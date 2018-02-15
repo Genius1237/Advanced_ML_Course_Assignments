@@ -1,16 +1,15 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include "classification_model.h"
 
 using namespace std;
-
-typedef pair<vector<double>,int> instance;
 
 vector<instance> readData(string filename,int nfeatures){
 	ifstream fin(filename,ios::in);
 	vector<instance> vec;
 	while(!fin.eof()){
-		vector<double> v(nfeatures);
+		attr v(nfeatures);
 		int op;
 		char c;
 		for(int i=0;i<nfeatures;i++){
@@ -31,4 +30,5 @@ int main(){
 		}
 		cout<<a.second<<endl;
 	}
+	return 0;
 }
