@@ -10,6 +10,7 @@ To run any code which uses matrix functionalities, compile them along with the `
 ```sh
 g++ -std=c++14 matrix.cpp <other files>.cpp
 ```
+
 ## Example usage of Matrix Class
 ```cpp
 // The header file matrix.h must be included
@@ -21,12 +22,11 @@ int main()
 	//Instantiation of a Matrix object
 	Matrix a(1,2), b(1,2), c(2,1), d(2,2), e(1,2);
 
-	//Access and modify data members with usual []   //notation
+	//Access and modify data members with usual [] notation
 	a[0][0]=14; a[0][1]=23;
 	b[0][0]=9; b[0][1]=12;
 
-	//Operations like matrix addition,
-	//multiplication and transpose
+	//Operations like matrix addition, multiplication and transpose
 	c = Transpose(a - b);
 	d = Transpose(a - b) * a;
 	e = a + b;
