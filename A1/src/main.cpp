@@ -23,17 +23,8 @@ vector<instance> readData(string filename,int nfeatures){
 }
 
 int main(){
-	/*
-	int nfeatures=4;
-	vector<instance> vec=readData("../data/test.txt",nfeatures);
-	for(auto a:vec){
-		for(auto b:a.first){
-			cout<<b<<" ";
-		}
-		cout<<a.second<<endl;
-	}
-	*/
-	Matrix<float> m(4,4);
+	Matrix m(4,4);
 	cout<<m;
+
 	return 0;
 }
