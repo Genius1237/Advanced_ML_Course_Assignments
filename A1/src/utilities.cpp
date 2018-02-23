@@ -1,10 +1,11 @@
 #include "utilities.h"
+#include <fstream>
 #include <cstdlib>
 #include <ctime>
 
 vector<instance> readData(string filename,int nfeatures){
-	ifstream fin(filename,ios::in);
-	vector<instance> vec;
+	std::ifstream fin(filename,std::ios::in);
+	std::vector<instance> vec;
 	while(!fin.eof()){
 		attr v(nfeatures);
 		int op;
@@ -26,14 +27,15 @@ Matrix<double> gradient_descent_optimizer(const std::function<double(Matrix<doub
 	
 	double eta=0.0001;
 
-	srand(time());
+	srand(time(0));
 	Matrix<double> w(n_params,1);
 	for(int i=0;i<n_params;i++){
 		w[i][0]=rand()%100;
 	}
 
-	while(){
+	while(true){
 		Matrix<double> dv=derivatives(w);
-		w=w-
+		
 	}
+	
 }
