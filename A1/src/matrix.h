@@ -13,10 +13,15 @@ public:
     Matrix(int rows, int cols);
     Matrix<T> operator = (const Matrix<T>& a);
     std::vector<T>& operator[](int index);
-    friend Matrix<T> operator+ (const Matrix<T>& a, const Matrix<T>& b);
-    friend Matrix<T> operator- (const Matrix<T>& a, const Matrix<T>& b);
-    friend Matrix<T> operator* (const Matrix<T>& a, const Matrix<T>& b);
-    friend Matrix<T> Transpose(const Matrix<T>& a);
-    friend std::ostream& operator<< (std::ostream&, const Matrix<T>& a);
+    template<class TT>
+    friend Matrix<TT> operator+ (const Matrix<TT>& a, const Matrix<TT>& b);
+    template<class TT>
+    friend Matrix<TT> operator- (const Matrix<TT>& a, const Matrix<TT>& b);
+    template<class TT>
+    friend Matrix<TT> operator* (const Matrix<TT>& a, const Matrix<TT>& b);
+    template<class TT>
+    friend Matrix<TT> Transpose(const Matrix<TT>& a);
+    template<class TT>
+    friend std::ostream& operator<< (std::ostream&, const Matrix<TT>& a);
 };
 #endif

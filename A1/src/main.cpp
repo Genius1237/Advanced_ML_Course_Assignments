@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include "classification_model.h"
+#include "matrix.h"
 
 using namespace std;
 
@@ -30,5 +31,7 @@ int main(){
 		}
 		cout<<a.second<<endl;
 	}
-	return 0;
+	/*Matrix<float> c(4,4);
+	cout << c;*/
+	return 0; 
 }
