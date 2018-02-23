@@ -2,19 +2,21 @@
 #define MATRIX_H_
 #include <iostream>
 #include <vector>
+
+template <typename T>
 class Matrix {
-    long double numrows;
-    long double numcols;
-    std::vector<std::vector<long double> > v;
+    int numrows;
+    int numcols;
+    std::vector<std::vector<T>> v;
 public:
-    Matrix(const Matrix&);
-    Matrix(long long int rows, long long int cols);
-    Matrix operator = (const Matrix& a);
-    std::vector<long double>& operator[](int index);
-    friend Matrix operator+ (const Matrix& a, const Matrix& b);
-    friend Matrix operator- (const Matrix& a, const Matrix& b);
-    friend Matrix operator* (const Matrix& a, const Matrix& b);
-    friend Matrix Transpose(const Matrix& a);
-    friend std::ostream& operator<< (std::ostream&, const Matrix& a);
+    Matrix(const Matrix<T>&);
+    Matrix(int rows, int cols);
+    Matrix<T> operator = (const Matrix<T>& a);
+    std::vector<T>& operator[](int index);
+    friend Matrix<T> operator+ (const Matrix<T>& a, const Matrix<T>& b);
+    friend Matrix<T> operator- (const Matrix<T>& a, const Matrix<T>& b);
+    friend Matrix<T> operator* (const Matrix<T>& a, const Matrix<T>& b);
+    friend Matrix<T> Transpose(const Matrix<T>& a);
+    friend std::ostream& operator<< (std::ostream&, const Matrix<T>& a);
 };
 #endif
