@@ -1,4 +1,5 @@
 #include "utilities.h"
+#include "matrix.h"
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
