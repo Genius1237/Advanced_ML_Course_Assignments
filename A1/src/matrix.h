@@ -9,6 +9,7 @@ class Matrix {
     int numcols;
     std::vector<std::vector<T>> v;
 public:
+    Matrix();
     Matrix(const Matrix<T>&);
     Matrix(int rows, int cols);
     Matrix<T>& Transpose();
@@ -28,6 +29,12 @@ public:
 };
 //Note: This assumes there will be NO dimension mismatches, 
 //Such exceptions can lead to undefined behaviour, mainly Segmentation Faults.
+
+template<typename T>
+Matrix<T>::Matrix(){
+    this->numcols=0;
+    this->numrows=0;
+}
 
 //Copy Constructor
 template<typename T>
