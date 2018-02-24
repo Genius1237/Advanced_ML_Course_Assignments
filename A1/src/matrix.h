@@ -21,7 +21,8 @@ public:
     friend Matrix<TT> operator- (const Matrix<TT>& a, const Matrix<TT>& b);
     template<class TT>
     friend Matrix<TT> operator* (const Matrix<TT>& a, const Matrix<TT>& b);
-    //template<class TT>
+    template<class TT>
+    friend Matrix<TT> operator* (const double a, const Matrix<TT>&b);
     template<class TT>
     friend std::ostream& operator<< (std::ostream&, const Matrix<TT>& a);
 };
@@ -93,6 +94,17 @@ Matrix<T> operator* (const Matrix<T>& a, const Matrix<T>& b) {
             for(int k = 0;k < a.numcols;k++) {
                 c.v[i][j] += a.v[i][k]*b.v[k][j];
             }
+        }
+    }
+    return c;
+}
+
+template<typename T>
+Matrix<T> operator* (const double a, const Matrix<T>& b) {
+    Matrix<T> c(b.numrows, b.numcols);
+    for(int i = 0; i < b.numrows; i++) {
+        for(int j = 0; j < b.numcols; j++) {
+            c.v[i][j] = a* b.v[i][j];
         }
     }
     return c;

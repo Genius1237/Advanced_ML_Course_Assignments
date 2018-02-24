@@ -3,6 +3,8 @@
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
+#include <cfloat>
 
 vector<instance> readData(string filename,int nfeatures){
 	std::ifstream fin(filename,std::ios::in);
@@ -23,20 +25,24 @@ vector<instance> readData(string filename,int nfeatures){
 Matrix<double> gradient_descent_optimizer(const std::function<double(Matrix<double>)> &function,
 										 const std::function<Matrix<double>(Matrix<double>)> &derivatives,
 										 double learning_rate,
-										 double n_params){
+										 int n_params){
 	
 	
-	double eta=0.0001;
-
 	srand(time(0));
 	Matrix<double> w(n_params,1);
 	for(int i=0;i<n_params;i++){
 		w[i][0]=rand()%100;
 	}
 
-	while(true){
+	double fval=DBL_MAX;
+	double fval_new=function(w);
+	while(abs(fval-fval_new)>=10e-10){
 		Matrix<double> dv=derivatives(w);
-		
+		w=w-learning_rate*dv;
+		fval=fval_new;
+		fval_new=function(w);
+		//std::cout<<fval_new<<endl;
 	}
-	
+
+	return w;	
 }

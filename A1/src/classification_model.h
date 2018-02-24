@@ -10,8 +10,8 @@ typedef pair<attr,int> instance;
 class ClassificationModel{
 	public:	
 		ClassificationModel();
-		void train(vector<instance>);
-		int classify(attr);
+		virtual void train(vector<instance>) =0;
+		virtual int classify(attr) =0;
 		void test(vector<instance>);
 };
 

@@ -6,9 +6,9 @@
 
 vector<instance> readData(string,int);
 
-Matrix<double> gradient_descent_optimizer(const std::function<double(Matrix<double>)>,
-										 const std::function<Matrix<double>(Matrix<double>)>,
-										 double,double);
+Matrix<double> gradient_descent_optimizer(const std::function<double(Matrix<double>)>&,
+										 const std::function<Matrix<double>(Matrix<double>)>&,
+										 double,int);
 	
 
 #endif
