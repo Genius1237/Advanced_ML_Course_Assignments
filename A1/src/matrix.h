@@ -12,16 +12,23 @@ public:
     Matrix();
     Matrix(const Matrix<T>&);
     Matrix(int rows, int cols);
-    Matrix<T>& Transpose();
+    Matrix<T> Transpose();
     Matrix<T> operator = (const Matrix<T>& a);
     std::vector<T>& operator[](int index);
-    
+    int n_rows();
+    int n_cols();
+    T sum();
+
     template<class TT>
     friend Matrix<TT> operator+ (const Matrix<TT>& a, const Matrix<TT>& b);
     template<class TT>
     friend Matrix<TT> operator- (const Matrix<TT>& a, const Matrix<TT>& b);
-    template<class TT>
-    friend Matrix<TT> operator* (const Matrix<TT>& a, const Matrix<TT>& b);
+    template <class TT>
+    friend Matrix<TT> operator+ (double a, const Matrix<TT> &b);
+    template <class TT>
+    friend Matrix<TT> operator- (double a, const Matrix<TT> &b);
+    template <class TT>
+    friend Matrix<TT> operator*(const Matrix<TT> &a, const Matrix<TT> &b);
     template<class TT>
     friend Matrix<TT> operator* (const double a, const Matrix<TT>&b);
     template<class TT>
@@ -55,6 +62,15 @@ Matrix<T>::Matrix(int rows, int cols) {
 }
 
 template<typename T>
+int Matrix<T>::n_rows(){
+    return numrows;
+}
+template <typename T>
+int Matrix<T>::n_cols(){
+    return numcols;
+}
+
+template<typename T>
 std::vector<T>& Matrix<T>::operator[](int index) {
     return v[index];
 }
@@ -76,6 +92,34 @@ Matrix<T> operator- (const Matrix<T>& a, const Matrix<T>& b) {
     for(int i = 0; i < a.numrows; i++) {
         for(int j = 0; j < a.numcols; j++) {
             c.v[i][j] = a.v[i][j] - b.v[i][j];
+        }
+    }
+    return c;
+}
+
+template <typename T>
+Matrix<T> operator+(double a, const Matrix<T> &b)
+{
+    Matrix<T> c(b.numrows, b.numcols);
+    for (int i = 0; i < b.numrows; i++)
+    {
+        for (int j = 0; j < b.numcols; j++)
+        {
+            c.v[i][j] = a + b.v[i][j];
+        }
+    }
+    return c;
+}
+
+template <typename T>
+Matrix<T> operator-(double a, const Matrix<T> &b)
+{
+    Matrix<T> c(b.numrows, b.numcols);
+    for (int i = 0; i < b.numrows; i++)
+    {
+        for (int j = 0; j < b.numcols; j++)
+        {
+            c.v[i][j] = a - b.v[i][j];
         }
     }
     return c;
@@ -118,7 +162,7 @@ Matrix<T> operator* (const double a, const Matrix<T>& b) {
 }
 
 template<typename T>
-Matrix<T>& Matrix<T>::Transpose(){
+Matrix<T> Matrix<T>::Transpose(){
     Matrix<T> b(numcols, numrows);
     for(int i = 0; i < numrows ; i++)
     {
@@ -138,6 +182,17 @@ std::ostream& operator<< (std::ostream& op, const Matrix<T>& a) {
         op << "\n";
     }
     return op;
+}
+
+template<typename T>
+T Matrix<T>::sum(){
+    T sum=0;
+    for(int i=0;i<numrows;i++){
+        for(int j=0;j<numcols;j++){
+            sum+=v[i][j];
+        }
+    }
+    return sum;
 }
 
 #endif

@@ -3,19 +3,17 @@
 #include <vector>
 #include "matrix.h"
 
-using namespace std;
-
-typedef vector<double> attr;
-typedef pair<attr,int> instance;
+typedef std::vector<double> attr;
+typedef std::pair<attr,int> instance;
 
 class ClassificationModel{
 	protected:
 		int n_features;
 	public:	
 		ClassificationModel(int);
-		virtual void train(vector<instance>) =0;
-		virtual int classify(attr) =0;
-		void test(vector<instance>);
+		virtual void train(std::vector<instance>&) =0;
+		virtual int classify(attr&) =0;
+		void test(std::vector<instance>);
 };
 
 class FischerDiscriminant: public ClassificationModel{
@@ -29,8 +27,12 @@ class ProbGenClassifier: public ClassificationModel{
 };
 
 class LogisticRegression: public ClassificationModel{
+	Matrix<double> weights;
 	public:
 		LogisticRegression(int);
+		void train(std::vector<instance>&);
+		int classify(attr&);
+		static Matrix<double> sigmoid(Matrix<double>&);
 };
 
 #endif

@@ -1,4 +1,4 @@
-CC=g++ --std=c++14
+CC=g++ --std=c++14 -g
 main: classification_model.o utilities.o matrix.o main.cpp
 	$(CC) classification_model.o utilities.o matrix.o main.cpp
 

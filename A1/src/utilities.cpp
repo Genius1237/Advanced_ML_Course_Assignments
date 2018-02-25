@@ -6,7 +6,7 @@
 #include <cmath>
 #include <cfloat>
 
-vector<instance> readData(string filename,int nfeatures){
+std::vector<instance> readData(std::string filename,int nfeatures){
 	std::ifstream fin(filename,std::ios::in);
 	std::vector<instance> vec;
 	while(!fin.eof()){
@@ -22,27 +22,28 @@ vector<instance> readData(string filename,int nfeatures){
 	return vec;
 }
 
-Matrix<double> gradient_descent_optimizer(const std::function<double(Matrix<double>)> &function,
-										 const std::function<Matrix<double>(Matrix<double>)> &derivatives,
-										 double learning_rate,
-										 int n_params){
-	
-	
+Matrix<double> gradient_descent_optimizer(const std::function<std::pair<double,Matrix<double>>(Matrix<double>)> &derivatives,
+										  int n_params,
+										  double learning_rate)
+{
+
 	srand(time(0));
 	Matrix<double> w(n_params,1);
 	for(int i=0;i<n_params;i++){
-		w[i][0]=rand()%100;
+		w[i][0]=(rand()%10)/100.0; 
 	}
 
-	double fval=DBL_MAX;
-	double fval_new=function(w);
-	while(abs(fval-fval_new)>=10e-10){
-		Matrix<double> dv=derivatives(w);
+	double fval=DBL_MAX,fval_prev;
+	
+	do{
+		auto a=derivatives(w);
+		fval_prev=fval;
+		fval=a.first;
+		std::cout<<fval_prev<<" "<<fval<<std::endl;	
+		Matrix<double> dv=a.second;
 		w=w-learning_rate*dv;
-		fval=fval_new;
-		fval_new=function(w);
-		//std::cout<<fval_new<<endl;
-	}
+		//std::cout<<fval<<std::endl;
+	} while (fabs(fval_prev-fval) >= 10e-10);
 
-	return w;	
+	return w;
 }

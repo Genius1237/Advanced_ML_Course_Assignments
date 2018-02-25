@@ -3,12 +3,11 @@
 #include "matrix.h"
 #include "classification_model.h"
 #include <functional>
+#include <string>
 
-vector<instance> readData(string,int);
+std::vector<instance> readData(std::string,int);
 
-Matrix<double> gradient_descent_optimizer(const std::function<double(Matrix<double>)>&,
-										 const std::function<Matrix<double>(Matrix<double>)>&,
-										 double,int);
-	
+Matrix<double> gradient_descent_optimizer(const std::function<std::pair<double, Matrix<double>>(Matrix<double>)>&,
+										  int, double);
 
 #endif
