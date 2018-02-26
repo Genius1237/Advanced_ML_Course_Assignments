@@ -19,6 +19,8 @@ class ClassificationModel{
 class FischerDiscriminant: public ClassificationModel{
 	public:
 		FischerDiscriminant(int);
+		void train(std::vector<instance>&);
+		int classify(attr&);
 };
 
 class ProbGenClassifier: public ClassificationModel{

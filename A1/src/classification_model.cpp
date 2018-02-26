@@ -143,3 +143,5 @@ int LogisticRegression::classify(attr& ist){
 int ProbGenClassifier::classify(attr& ist){
 	return 0;
 }
+
+
