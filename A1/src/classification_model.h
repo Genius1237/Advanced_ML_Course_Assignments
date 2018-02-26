@@ -24,6 +24,8 @@ class FischerDiscriminant: public ClassificationModel{
 class ProbGenClassifier: public ClassificationModel{
 	public:
 		ProbGenClassifier(int);
+		void train(std::vector<instance>&);
+		int classify(attr&);
 };
 
 class LogisticRegression: public ClassificationModel{
