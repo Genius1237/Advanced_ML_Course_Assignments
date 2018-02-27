@@ -67,9 +67,9 @@ double FischerDiscriminant::getEntropy(int npos, int nneg)
         return 0.000;
     }
     double ans = 0.00;
-    double ppos = npos*1.000/(npos*1.000 + nneg*1.000);
-    double pneg = 1.000 - ppos;
-    ans = ppos*log2(ppos) + pneg*log2(pneg);
+    double ppos = (npos*1.000)/(npos*1.000 + nneg*1.000);
+    double pneg = (nneg*1.000)/(npos*1.000 + nneg*1.000);
+    ans = (-1.000*ppos*log2(ppos)) + (-1.000*pneg*log2(pneg));
     return ans;
 }
 
@@ -82,7 +82,7 @@ void FischerDiscriminant::train(std::vector<instance>& train_data)
     int numc2 = 0;
     for(i=0;i<size;i++)
     {
-        if(train_data[i].second==1)
+        if(train_data[i].second == 0)
         {
             numc1++;
         }
@@ -111,7 +111,7 @@ void FischerDiscriminant::train(std::vector<instance>& train_data)
     //std::cout<<numc1<<" "<<numc2<<std::endl;
     for(i=0;i<size;i++)
     {
-        if(train_data[i].second==1)
+        if(train_data[i].second == 0)
         {
             for(j=0;j<n_features;j++)
             {
@@ -162,22 +162,23 @@ void FischerDiscriminant::train(std::vector<instance>& train_data)
     }
     Matrix<double> Swinverse = Sw.inverse();
     Matrix<double> w = Swinverse*(c2mean - c1mean);
+    // std::cout << w << std::endl;
     w = (1*1.000/w.norm2())*w;
-    //std::cout << w << std::endl;
+    // std::cout << w << std::endl;
     this->wT = w.Transpose();
     std::vector< std::pair<double,int> > tfpoints;
     k1=0;
     tfpoints.resize(size);
     for(i=0;i<numc1;i++)
     {
-        double dimRedvalue = (wT*c1data[i])[0][0];
-        tfpoints[k1] = std::make_pair(dimRedvalue,1);
+        double dimRedvalue = (this->wT*c1data[i])[0][0];
+        tfpoints[k1] = std::make_pair(dimRedvalue,0);
         k1++;
     }
     for(i=0;i<numc2;i++)
     {
-        double dimRedvalue = (wT*c2data[i])[0][0];
-        tfpoints[k1] = std::make_pair(dimRedvalue,0);
+        double dimRedvalue = (this->wT*c2data[i])[0][0];
+        tfpoints[k1] = std::make_pair(dimRedvalue,1);
         k1++;
     }
     std::sort(tfpoints.begin(),tfpoints.end());
@@ -189,11 +190,11 @@ void FischerDiscriminant::train(std::vector<instance>& train_data)
 
     int lnc1=0,lnc2=0;
     int rnc1=numc1,rnc2=numc2;
-    double entropy_min = 1.000;
-    this->y0 = tfpoints[0].first;
+    double entropy_min = 2.000;
+    this->y0 = (tfpoints[0].first+tfpoints[1].first)*0.5000;
     for(i=0;i<size-1;i++)
     {
-        if(tfpoints[i].second == 1)
+        if(tfpoints[i].second == 0)
         {
             lnc1++;
             rnc1--;
@@ -205,10 +206,12 @@ void FischerDiscriminant::train(std::vector<instance>& train_data)
         }
         double entropy_left = this->getEntropy(lnc1,lnc2);
         double entropy_right = this->getEntropy(rnc1,rnc2);
-        double total_entropy = (entropy_left*(i+1)/size) + (entropy_right*(size-i-1)/size);
+        double total_entropy = (entropy_left*(i+1)/(size*1.000)) + (entropy_right*(size-i-1)/(size*1.000));
+        //std::cout << total_entropy << std::endl;
         if(total_entropy<entropy_min)
         {
-            this->y0 = (tfpoints[i].first + tfpoints[i].second)*0.5000;
+            this->y0 = (tfpoints[i].first + tfpoints[i+1].first)*0.5000;
+            entropy_min = total_entropy;
         }
     }
     /*std::cout << this->wT << std::endl;
@@ -228,9 +231,9 @@ int FischerDiscriminant::classify(attr& inst)
     double dimRedvalue = (this->wT*tindata)[0][0];
     if(dimRedvalue>=this->y0)
     {
-        return 0;
+        return 1;
     }
-    return 1;
+    return 0;
 }
 
 void ProbGenClassifier::train(std::vector<instance>& train_data) {
