@@ -29,6 +29,9 @@ int main(){
 	ProbGenClassifier p1(n_features);
 	p1.train(train);
 	p1.test(test);
+	FischerDiscriminant obj(n_features);
+	obj.train(train);
+	obj.test(test);
 	/*cout<<"\n---------------------------------\n";
 	for(auto i: train) {
 		for(auto j: i.first) {
