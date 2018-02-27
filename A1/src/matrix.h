@@ -10,6 +10,7 @@ class Matrix {
     std::vector<std::vector<T>> v;
     T determinant(Matrix<T>, int a, int b);
     Matrix<T> adjoint(int a);
+    T euclidNorm();
     Matrix<T> inv(Matrix<T>&);
 public:
     Matrix();
@@ -17,6 +18,7 @@ public:
     Matrix(int rows, int cols);
     Matrix<T> Transpose();
     Matrix<T> inverse();
+    T norm2();
     Matrix<T> operator = (const Matrix<T>& a);
     std::vector<T>& operator[](int index);
     void cofactor(Matrix<T>,Matrix<T>&,int a ,int b ,int c);
@@ -290,4 +292,27 @@ template<typename T>
 Matrix<T> Matrix<T>::inverse() {
 	return inv(*this);
 }
+
+template<typename T>
+T Matrix<T>::euclidNorm()
+{
+	T sum = 0;
+	int i,j;
+	for(i=0;i<this->numrows;i++)
+	{
+		for(j=0;j<this->numcols;j++)
+		{
+			sum = sum + (this->v[i][j])*(this->v[i][j]);
+		}
+	}
+	return sum;
+}
+
+template<typename T>
+T Matrix<T>::norm2()
+{
+	return euclidNorm();
+}
+
+
 #endif
