@@ -54,6 +54,184 @@ ProbGenClassifier::ProbGenClassifier(int n_features) : ClassificationModel(n_fea
 	w = Matrix<double>(1, n_features);
 }
 
+FischerDiscriminant::FischerDiscriminant(int n_features) : ClassificationModel(n_features)
+{
+
+}
+
+double FischerDiscriminant::getEntropy(int npos, int nneg)
+{
+    if( npos == 0 || nneg == 0)
+    {
+        return 0.000;
+    }
+    double ans = 0.00;
+    double ppos = npos*1.000/(npos*1.000 + nneg*1.000);
+    double pneg = 1.000 - ppos;
+    ans = ppos*log2(ppos) + pneg*log2(pneg);
+    return ans;
+}
+
+void FischerDiscriminant::train(std::vector<instance>& train_data)
+{
+    int size = train_data.size();
+    int i,j;
+    int dims = train_data[0].first.size();
+    int numc1 = 0;
+    int numc2 = 0;
+    for(i=0;i<size;i++)
+    {
+        if(train_data[i].second==1)
+        {
+            numc1++;
+        }
+        else
+        {
+            numc2++;
+        }
+    }
+    std::vector<Matrix<double> > c1data;
+    std::vector<Matrix<double> > c2data;
+    for(i=0;i<size;i++)
+    {
+        Matrix<double> temp(n_features,1);
+        c1data.push_back(temp);
+        c2data.push_back(temp);
+    }
+    Matrix<double> c1mean(n_features,1);
+    Matrix<double> c2mean(n_features,1);
+    //std::cout<<"Here"<<std::  endl;
+    for(i=0;i<n_features;i++)
+    {
+        c1mean[i][0] = 0.000;
+        c2mean[i][0] = 0.000;
+    }
+    int k1=0,k2=0;
+    //std::cout<<numc1<<" "<<numc2<<std::endl;
+    for(i=0;i<size;i++)
+    {
+        if(train_data[i].second==1)
+        {
+            for(j=0;j<n_features;j++)
+            {
+                c1data[k1][j][0] = train_data[i].first[j];
+                c1mean[j][0] = c1mean[j][0] + train_data[i].first[j]; 
+            }
+            k1++;
+        }
+        else
+        {
+            for(j=0;j<n_features;j++)
+            {
+                c2data[k2][j][0] = train_data[i].first[j];
+                c2mean[j][0] = c2mean[j][0] + train_data[i].first[j]; 
+            }
+            k2++;
+        }
+    }
+    c1mean = (1*1.000/numc1)*c1mean;
+    c2mean = (1*1.000/numc2)*c2mean;
+    std::cout<<c1mean<<std::endl;
+    std::cout<<c2mean<<std::endl;
+    Matrix<double> Sw;
+    Matrix<double> temp;
+    for(i=0;i<numc1;i++)
+    {
+        temp = c1data[i] - c1mean;
+        if((Sw.n_rows() + Sw.n_cols())==0)
+        {
+            Sw = temp*temp.Transpose();
+        }
+        else
+        {
+            Sw = Sw + temp*temp.Transpose();
+        }
+    }
+    for(i=0;i<numc2;i++)
+    {
+        temp = c2data[i] - c2mean;
+        if((Sw.n_rows() + Sw.n_cols())==0)
+        {
+            Sw = temp*temp.Transpose();
+        }
+        else
+        {
+            Sw = Sw + temp*temp.Transpose();
+        }
+    }
+    Matrix<double> Swinverse = Sw.inverse();
+    Matrix<double> w = Swinverse*(c2mean - c1mean);
+    w = (1*1.000/w.norm2())*w;
+    //std::cout << w << std::endl;
+    this->wT = w.Transpose();
+    std::vector< std::pair<double,int> > tfpoints;
+    k1=0;
+    tfpoints.resize(size);
+    for(i=0;i<numc1;i++)
+    {
+        double dimRedvalue = (wT*c1data[i])[0][0];
+        tfpoints[k1] = std::make_pair(dimRedvalue,1);
+        k1++;
+    }
+    for(i=0;i<numc2;i++)
+    {
+        double dimRedvalue = (wT*c2data[i])[0][0];
+        tfpoints[k1] = std::make_pair(dimRedvalue,0);
+        k1++;
+    }
+    std::sort(tfpoints.begin(),tfpoints.end());
+    /*for(i=0;i<size;i++)
+    {
+        std::cout << tfpoints[i].first << " " << tfpoints[i].second << std::endl;
+    }*/
+    // Now to find the y0 that would give minimum entropy.
+
+    int lnc1=0,lnc2=0;
+    int rnc1=numc1,rnc2=numc2;
+    double entropy_min = 1.000;
+    this->y0 = tfpoints[0].first;
+    for(i=0;i<size-1;i++)
+    {
+        if(tfpoints[i].second == 1)
+        {
+            lnc1++;
+            rnc1--;
+        }
+        else
+        {
+            lnc2++;
+            rnc2--;
+        }
+        double entropy_left = this->getEntropy(lnc1,lnc2);
+        double entropy_right = this->getEntropy(rnc1,rnc2);
+        double total_entropy = (entropy_left*(i+1)/size) + (entropy_right*(size-i-1)/size);
+        if(total_entropy<entropy_min)
+        {
+            this->y0 = (tfpoints[i].first + tfpoints[i].second)*0.5000;
+        }
+    }
+    std::cout << this->wT << std::endl;
+    std::cout << this->y0 << " " << lnc1 << " " << lnc2 << std::endl;
+}
+
+int FischerDiscriminant::classify(attr& inst)
+{
+    int size = inst.size();
+    //std::cout << size << std::endl;
+    Matrix<double> tindata(size,1);
+    int i;
+    for(i=0;i<size;i++)
+    {
+        tindata[i][0] = inst[i];
+    }
+    double dimRedvalue = (this->wT*tindata)[0][0];
+    if(dimRedvalue>=this->y0)
+    {
+        return 0;
+    }
+    return 1;
+}
+
 void ProbGenClassifier::train(std::vector<instance>& train_data) {
 
 	//Calculation of means mu1 and mu2

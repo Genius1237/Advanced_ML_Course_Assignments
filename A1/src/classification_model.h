@@ -1,6 +1,7 @@
 #ifndef CLASSIFICATION_MODEL_H
 #define CLASSIFICATION_MODEL_H
 #include <vector>
+#include <algorithm>
 #include "matrix.h"
 
 typedef std::vector<double> attr;
@@ -18,9 +19,12 @@ class ClassificationModel{
 };
 
 class FischerDiscriminant: public ClassificationModel{
+	Matrix<double> wT;
+	double y0;
 	public:
 		FischerDiscriminant(int);
 		void train(std::vector<instance>&);
+		double getEntropy(int, int);
 		int classify(attr&);
 };
 

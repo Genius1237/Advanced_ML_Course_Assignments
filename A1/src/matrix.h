@@ -2,6 +2,7 @@
 #define MATRIX_H_
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 template <typename T>
 class Matrix {
@@ -305,7 +306,7 @@ T Matrix<T>::euclidNorm()
 			sum = sum + (this->v[i][j])*(this->v[i][j]);
 		}
 	}
-	return sum;
+	return sqrt(sum);
 }
 
 template<typename T>
