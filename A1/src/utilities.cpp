@@ -30,7 +30,7 @@ Matrix<double> gradient_descent_optimizer(const std::function<std::pair<double,M
 	srand(time(0));
 	Matrix<double> w(n_params,1);
 	for(int i=0;i<n_params;i++){
-		w[i][0]=(rand()%10)/100.0; 
+		w[i][0]=(rand()%100)/100.0; 
 	}
 
 	double fval=DBL_MAX,fval_prev;
@@ -39,11 +39,13 @@ Matrix<double> gradient_descent_optimizer(const std::function<std::pair<double,M
 		auto a=derivatives(w);
 		fval_prev=fval;
 		fval=a.first;
-		std::cout<<fval_prev<<" "<<fval<<std::endl;	
+		//std::cout<<fval_prev<<" "<<fval<<std::endl;	
 		Matrix<double> dv=a.second;
-		w=w-learning_rate*dv;
-		//std::cout<<fval<<std::endl;
-	} while (fabs(fval_prev-fval) >= 10e-10);
+		w=w-(learning_rate*dv);
+		//std::cout<<w<<dv<<std::endl;
+		std::cout<<fval<<std::endl;
+		//getchar();
+	} while (fabs(fval_prev-fval) >= 10e-5);
 
 	return w;
 }

@@ -40,8 +40,14 @@ void ClassificationModel::test(std::vector<instance> data){
     std::cout << "FN: "<<fn<<"    "<<"TN: "<<tn<<'\n';
 }
 
-LogisticRegression::LogisticRegression(int n_features) : ClassificationModel(n_features){
-    weights = Matrix<double>(n_features+1, 1);
+Matrix<double> ClassificationModel::sigmoid(Matrix<double>& d){
+    Matrix<double> m=d;
+    for(int i=0;i<m.n_rows();i++){
+        for(int j=0;j<m.n_cols();j++){
+            m[i][j]=1/(1+exp(-m[i][j]));
+        }
+    }
+    return m;
 }
 
 ProbGenClassifier::ProbGenClassifier(int n_features) : ClassificationModel(n_features){
@@ -227,6 +233,7 @@ int FischerDiscriminant::classify(attr& inst)
 }
 
 void ProbGenClassifier::train(std::vector<instance>& train_data) {
+
 	//Calculation of means mu1 and mu2
 	int n = train_data.size(), n1=0, n0=0;
 	double sum1=0, sum0=0;
@@ -281,8 +288,21 @@ void ProbGenClassifier::train(std::vector<instance>& train_data) {
 	// std::cout << w << '\n' << w0 << '\n';
 }
 
+int ProbGenClassifier::classify(attr& ist){
+	Matrix<double> x(n_features, 1);
+	for(int i = 0; i < n_features; i++) {
+		x[i][0] = ist[i];
+	}
+	double res = (w.Transpose()*x)[0][0]+w0;
+	return res>=0.5;
+}
+
+LogisticRegression::LogisticRegression(int n_features) : ClassificationModel(n_features){
+
+}
+
 void LogisticRegression::train(std::vector<instance>& train_data){
-    double learning_rate=0.01;
+    double learning_rate=0.003;
     
     int n=train_data.size();
     Matrix<double> inputs=Matrix<double>(n,n_features+1);
@@ -297,10 +317,6 @@ void LogisticRegression::train(std::vector<instance>& train_data){
 
     std::function<Matrix<double>(Matrix<double>)> feed_forward=[&](Matrix<double> w){
         Matrix<double> m = inputs * w;
-        auto m1=sigmoid(m);
-        for(int i=0;i<m.n_rows();i++){
-            //std::cout<<m[i][0]<<" "<<m1[i][0]<<std::endl;
-        }
         return sigmoid(m);
     };
 
@@ -310,36 +326,25 @@ void LogisticRegression::train(std::vector<instance>& train_data){
         //Cross Entropy Error Function
         double error = 0;
         for (int i = 0; i < n; i++){
-                error += outputs[i][0] * log2(y[i][0]);
-                error += (1 - outputs[i][0]) * (log2(1 - y[i][0]));
+            if(outputs[i][0]==0){
+               error+=log(1-y[i][0]);
+            }else{
+                error += log(y[i][0]);
+            }
         }
-
-        Matrix<double> dv = ((y - outputs).sum()) * w;
+        Matrix<double> dv(n_features+1,1);
+        Matrix<double> temp=y-outputs;
+        //std::cout<<temp<<std::endl;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n_features+1;j++){
+                dv[j][0]+=inputs[i][j]*(temp)[i][0];
+            }
+        }
         return std::make_pair(-error, dv);
-        };
+    };
 
     weights = gradient_descent_optimizer(back_prop, n_features + 1, learning_rate);
-
-}
-
-Matrix<double> ProbGenClassifier::sigmoid(Matrix<double>& d){
-    Matrix<double> m=d;
-    for(int i=0;i<m.n_rows();i++){
-        for(int j=0;j<m.n_cols();j++){
-            m[i][j]=1/(1+exp(-m[i][j]));
-        }
-    }
-    return m;
-}
-
-Matrix<double> LogisticRegression::sigmoid(Matrix<double>& d){
-    Matrix<double> m=d;
-    for(int i=0;i<m.n_rows();i++){
-        for(int j=0;j<m.n_cols();j++){
-            m[i][j]=1/(1+exp(-m[i][j]));
-        }
-    }
-    return m;
+    std::cout<<weights<<std::endl;
 }
 
 int LogisticRegression::classify(attr& ist){
@@ -357,12 +362,3 @@ int LogisticRegression::classify(attr& ist){
     }
 }
 
-
-int ProbGenClassifier::classify(attr& ist){
-	Matrix<double> x(n_features, 1);
-	for(int i = 0; i < n_features; i++) {
-		x[i][0] = ist[i];
-	}
-	double res = (w.Transpose()*x)[0][0]+w0;
-	return res>=0.5;
-}
