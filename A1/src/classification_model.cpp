@@ -35,6 +35,7 @@ void ClassificationModel::test(std::vector<instance> data){
     std::cout<<"Accuracy is "<<((double)correct)/n<<std::endl;
     std::cout<<"Precision is: "<<((double)tp)/(tp+fp)<<std::endl;
     std::cout<<"Recall is: "<<((double)tp)/(tp+fn)<<std::endl;
+    std::cout<<"F1-Measure is: "<<((double)2*tp)/(2*tp+fp+fn)<<std::endl;
     std::cout << "Confusion Matrix \n";
     std::cout << "TP: "<<tp<<"    "<<"FP: "<<fp<<'\n';
     std::cout << "FN: "<<fn<<"    "<<"TN: "<<tn<<'\n';
@@ -131,8 +132,8 @@ void FischerDiscriminant::train(std::vector<instance>& train_data)
     }
     c1mean = (1*1.000/numc1)*c1mean;
     c2mean = (1*1.000/numc2)*c2mean;
-    std::cout<<c1mean<<std::endl;
-    std::cout<<c2mean<<std::endl;
+    /*std::cout<<c1mean<<std::endl;
+    std::cout<<c2mean<<std::endl;*/
     Matrix<double> Sw;
     Matrix<double> temp;
     for(i=0;i<numc1;i++)
@@ -210,8 +211,8 @@ void FischerDiscriminant::train(std::vector<instance>& train_data)
             this->y0 = (tfpoints[i].first + tfpoints[i].second)*0.5000;
         }
     }
-    std::cout << this->wT << std::endl;
-    std::cout << this->y0 << " " << lnc1 << " " << lnc2 << std::endl;
+    /*std::cout << this->wT << std::endl;
+    std::cout << this->y0 << " " << lnc1 << " " << lnc2 << std::endl;*/
 }
 
 int FischerDiscriminant::classify(attr& inst)
@@ -261,7 +262,7 @@ void ProbGenClassifier::train(std::vector<instance>& train_data) {
 	mu1 = (1.0 / n1) * mu1;
 	mu0 = (1.0 / n0) * mu0;
 
-	std::cout << mu0 << '\n' << mu1 << '\n';
+	// std::cout << mu0 << '\n' << mu1 << '\n';
 
 	//Calculation of covariance S
 	Matrix<double> s1(n_features, n_features);
@@ -288,12 +289,17 @@ void ProbGenClassifier::train(std::vector<instance>& train_data) {
 	// std::cout << w << '\n' << w0 << '\n';
 }
 
+double ProbGenClassifier::sigmoid(double x) {
+	return 1/(1+exp(-x));
+}
+
 int ProbGenClassifier::classify(attr& ist){
 	Matrix<double> x(n_features, 1);
 	for(int i = 0; i < n_features; i++) {
 		x[i][0] = ist[i];
 	}
 	double res = (w.Transpose()*x)[0][0]+w0;
+	res = sigmoid(res);
 	return res>=0.5;
 }
 
@@ -344,7 +350,7 @@ void LogisticRegression::train(std::vector<instance>& train_data){
     };
 
     weights = gradient_descent_optimizer(back_prop, n_features + 1, learning_rate);
-    std::cout<<weights<<std::endl;
+    // std::cout<<weights<<std::endl;
 }
 
 int LogisticRegression::classify(attr& ist){

@@ -43,7 +43,7 @@ Matrix<double> gradient_descent_optimizer(const std::function<std::pair<double,M
 		Matrix<double> dv=a.second;
 		w=w-(learning_rate*dv);
 		//std::cout<<w<<dv<<std::endl;
-		std::cout<<fval<<std::endl;
+		// std::cout<<fval<<std::endl;
 		//getchar();
 	} while (fabs(fval_prev-fval) >= 10e-5);
 

@@ -35,6 +35,7 @@ class ProbGenClassifier: public ClassificationModel{
 		ProbGenClassifier(int);
 		void train(std::vector<instance>&);
 		int classify(attr&);
+		double sigmoid(double x);
 };
 
 class LogisticRegression: public ClassificationModel{

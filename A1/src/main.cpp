@@ -25,10 +25,19 @@ int main(){
 	//vector<instance> train;
 	//train.push_back(make_pair(vector<double>({0.5,0.5}),1));
 	//train.push_back(make_pair(vector<double>({-0.5,-0.5}), 0));
-	LogisticRegression c(n_features);
+	FischerDiscriminant c1(n_features);
+	ProbGenClassifier c2(n_features);
+	LogisticRegression c3(n_features);
 	//ProbGenClassifier c(n_features);
-	c.train(train);
-	c.test(test);
+	cout << "\nFischer Linear Discriminant\n---------------\n";
+	c1.train(train);
+	c1.test(test);
+	cout << "\nProbabilistic Generative Classifier\n---------------\n";
+	c2.train(train);
+	c2.test(test);
+	cout << "\nLogistic Regression\n---------------\n";
+	c3.train(train);
+	c3.test(test);
 	/*cout<<"\n---------------------------------\n";
 	for(auto i: train) {
 		for(auto j: i.first) {
@@ -39,6 +48,6 @@ int main(){
 	/*l1.test(train);
 	l1.test(test);*/
 	//auto e1=vector<double>({-0.5,-0.5});
-	//cout<<l1.classify(e1);
+	//`<<l1.classify(e1);
 	return 0;
 }
