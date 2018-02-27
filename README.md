@@ -1,5 +1,5 @@
 # ML2-assignments
-Solutions to Deep Learning Assignments 2018-19 from BITS Pilani Hyderabad Campus
+Solutions to Advanced Machine Learning Assignments 2018-19 from BITS Pilani Hyderabad Campus
 # Assignment 1
 ## Matrix Class
 Include the matrix.h file in the code which needs to make use of matrix operations by

@@ -11,19 +11,26 @@ class ClassificationModel{
 		int n_features;
 	public:	
 		ClassificationModel(int);
-		virtual void train(std::vector<instance>&) =0;
-		virtual int classify(attr&) =0;
+		virtual void train(std::vector<instance>&) = 0;
+		virtual int classify(attr&) = 0;
 		void test(std::vector<instance>);
 };
 
 class FischerDiscriminant: public ClassificationModel{
 	public:
 		FischerDiscriminant(int);
+		void train(std::vector<instance>&);
+		int classify(attr&);
 };
 
 class ProbGenClassifier: public ClassificationModel{
+		Matrix<double> w;
+		double w0;
 	public:
 		ProbGenClassifier(int);
+		void train(std::vector<instance>&);
+		int classify(attr&);
+		static Matrix<double> sigmoid(Matrix<double>&);
 };
 
 class LogisticRegression: public ClassificationModel{
