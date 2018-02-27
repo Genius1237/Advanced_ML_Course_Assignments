@@ -25,10 +25,10 @@ int main(){
 	//vector<instance> train;
 	//train.push_back(make_pair(vector<double>({0.5,0.5}),1));
 	//train.push_back(make_pair(vector<double>({-0.5,-0.5}), 0));
-	LogisticRegression l1(n_features);
-	ProbGenClassifier p1(n_features);
-	p1.train(train);
-	p1.test(test);
+	LogisticRegression c(n_features);
+	//ProbGenClassifier c(n_features);
+	c.train(train);
+	c.test(test);
 	/*cout<<"\n---------------------------------\n";
 	for(auto i: train) {
 		for(auto j: i.first) {

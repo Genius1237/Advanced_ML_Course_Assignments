@@ -149,9 +149,9 @@ void LogisticRegression::train(std::vector<instance>& train_data){
         double error = 0;
         for (int i = 0; i < n; i++){
             if(outputs[i][0]==0){
-               error+=log(1-y[i][0]);
+                error+=log(1-y[i][0]);
             }else{
-                error += log(y[i][0]);
+                error+=log(y[i][0]);
             }
         }
         Matrix<double> dv(n_features+1,1);
@@ -175,8 +175,10 @@ int LogisticRegression::classify(attr& ist){
     for(int i=0;i<n_features;i++){
         x[i+1][0]=ist[i];
     }
-    Matrix<double> a=weights*(x.Transpose());
-    double t=sigmoid(a)[0][0];
+    
+    //std::cout<<a<<std::endl<<t<<std::endl;
+    Matrix<double> a = weights.Transpose() *x;
+    double t = sigmoid(a)[0][0];
     if(t>=0.5){
         return 1;
     }else{

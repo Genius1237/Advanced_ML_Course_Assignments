@@ -14,6 +14,7 @@ class ClassificationModel{
 		virtual void train(std::vector<instance>&) = 0;
 		virtual int classify(attr&) = 0;
 		void test(std::vector<instance>);
+		static Matrix<double> sigmoid(Matrix<double> &);
 };
 
 class FischerDiscriminant: public ClassificationModel{
@@ -30,7 +31,6 @@ class ProbGenClassifier: public ClassificationModel{
 		ProbGenClassifier(int);
 		void train(std::vector<instance>&);
 		int classify(attr&);
-		static Matrix<double> sigmoid(Matrix<double>&);
 };
 
 class LogisticRegression: public ClassificationModel{
@@ -39,7 +39,6 @@ class LogisticRegression: public ClassificationModel{
 		LogisticRegression(int);
 		void train(std::vector<instance>&);
 		int classify(attr&);
-		static Matrix<double> sigmoid(Matrix<double>&);
 };
 
 #endif
