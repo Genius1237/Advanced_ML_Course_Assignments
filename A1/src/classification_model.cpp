@@ -8,22 +8,15 @@ ClassificationModel::ClassificationModel(int n_features){
 }
 
 void ClassificationModel::test(std::vector<instance> data){
-    int n=data.size();
-    int correct=0;
-    for(int i=0;i<n;i++){
-        if(classify(data[i].first)==data[i].second){
-            correct++;
-        }
-    }
-    std::cout<<"Accuracy is "<<((double)correct)/n<<std::endl;
+    
 }
 
 LogisticRegression::LogisticRegression(int n_features) : ClassificationModel(n_features){
-    weights = Matrix<double>(n_features+1, 1);
+    //weights = Matrix<double>(n_features+1, 1);
 }
 
 void LogisticRegression::train(std::vector<instance>& train_data){
-    double learning_rate=0.01;
+    double learning_rate=0.003;
     
     int n=train_data.size();
     Matrix<double> inputs=Matrix<double>(n,n_features+1);
@@ -38,10 +31,6 @@ void LogisticRegression::train(std::vector<instance>& train_data){
 
     std::function<Matrix<double>(Matrix<double>)> feed_forward=[&](Matrix<double> w){
         Matrix<double> m = inputs * w;
-        auto m1=sigmoid(m);
-        for(int i=0;i<m.n_rows();i++){
-            //std::cout<<m[i][0]<<" "<<m1[i][0]<<std::endl;
-        }
         return sigmoid(m);
     };
 
@@ -51,16 +40,25 @@ void LogisticRegression::train(std::vector<instance>& train_data){
         //Cross Entropy Error Function
         double error = 0;
         for (int i = 0; i < n; i++){
-                error += outputs[i][0] * log2(y[i][0]);
-                error += (1 - outputs[i][0]) * (log2(1 - y[i][0]));
+            if(outputs[i][0]==0){
+               error+=log(1-y[i][0]);
+            }else{
+                error += log(y[i][0]);
+            }
         }
-
-        Matrix<double> dv = ((y - outputs).sum()) * w;
+        Matrix<double> dv(n_features+1,1);
+        Matrix<double> temp=y-outputs;
+        //std::cout<<temp<<std::endl;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n_features+1;j++){
+                dv[j][0]+=inputs[i][j]*(temp)[i][0];
+            }
+        }
         return std::make_pair(-error, dv);
-        };
+    };
 
     weights = gradient_descent_optimizer(back_prop, n_features + 1, learning_rate);
-
+    std::cout<<weights<<std::endl;
 }
 
 Matrix<double> LogisticRegression::sigmoid(Matrix<double>& d){
