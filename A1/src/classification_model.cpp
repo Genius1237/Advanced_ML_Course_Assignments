@@ -51,10 +51,6 @@ Matrix<double> ClassificationModel::sigmoid(Matrix<double>& d){
     return m;
 }
 
-ProbGenClassifier::ProbGenClassifier(int n_features) : ClassificationModel(n_features){
-	w = Matrix<double>(1, n_features);
-}
-
 FischerDiscriminant::FischerDiscriminant(int n_features) : ClassificationModel(n_features)
 {
 
@@ -234,6 +230,10 @@ int FischerDiscriminant::classify(attr& inst)
         return 1;
     }
     return 0;
+}
+
+ProbGenClassifier::ProbGenClassifier(int n_features) : ClassificationModel(n_features){
+	w = Matrix<double>(1, n_features);
 }
 
 void ProbGenClassifier::train(std::vector<instance>& train_data) {
