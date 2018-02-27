@@ -9,13 +9,35 @@ ClassificationModel::ClassificationModel(int n_features){
 
 void ClassificationModel::test(std::vector<instance> data){
     int n=data.size();
-    int correct=0;
-    for(int i=0;i<n;i++){
+    int tp=0,tn=0,fp=0,fn=0;
+    int correct=0,precision=0,recall=0;
+    for(int i=0;i<n;i++) {
         if(classify(data[i].first)==data[i].second){
             correct++;
         }
+        if(classify(data[i].first)) {
+        	if(data[i].second) {
+        		tp++;
+        	}
+        	else {
+        		fp++;
+        	}
+        }
+        else {
+        	if(data[i].second) {
+        		fn++;
+        	}
+        	else {
+        		tn++;
+        	}
+        }
     }
     std::cout<<"Accuracy is "<<((double)correct)/n<<std::endl;
+    std::cout<<"Precision is: "<<((double)tp)/(tp+fp)<<std::endl;
+    std::cout<<"Recall is: "<<((double)tp)/(tp+fn)<<std::endl;
+    std::cout << "Confusion Matrix \n";
+    std::cout << "TP: "<<tp<<"    "<<"FP: "<<fp<<'\n';
+    std::cout << "FN: "<<fn<<"    "<<"TN: "<<tn<<'\n';
 }
 
 LogisticRegression::LogisticRegression(int n_features) : ClassificationModel(n_features){
@@ -23,54 +45,62 @@ LogisticRegression::LogisticRegression(int n_features) : ClassificationModel(n_f
 }
 
 ProbGenClassifier::ProbGenClassifier(int n_features) : ClassificationModel(n_features){
-    /*weights0 = Matrix<double>(n_features+1, 1);
-    weights1 = Matrix<double>(n_features+1, 1);*/
+	w = Matrix<double>(1, n_features);
 }
 
 void ProbGenClassifier::train(std::vector<instance>& train_data) {
 	//Calculation of means mu1 and mu2
 	int n = train_data.size(), n1=0, n0=0;
 	double sum1=0, sum0=0;
-	Matrix<double> x = Matrix<double>(n, n_features+1);	
-	Matrix<double> outputs=Matrix<double>(n,1);
-	for(int i=0;i<n;i++) {
-		outputs[i][0] = train_data[i].second;
-		sum1+=outputs[i][0];
-		sum0+=1-outputs[i][0];
-		if(outputs[i][0]) {
+	Matrix<double> temp(n_features, 1);
+	std::vector<Matrix<double> > x(n, temp);
+	Matrix<double> t(n, 1);
+	for(int i = 0; i < n; i++) {
+		for(int j = 0; j < n_features; j++) {
+			x[i][j][0] = train_data[i].first[j];
+		}
+	}
+	Matrix<double>mu1(n_features, 1);
+	Matrix<double>mu0(n_features, 1);
+	for(int i = 0;i < n; i++) {
+		t[i][0] = train_data[i].second;
+		if(t[i][0]) {
 			n1++;
+			mu1 = mu1 + t[i][0]*x[i];
 		}
 		else {
 			n0++;
-		}
-		x[i][0]=1;
-		for(int j = 0;j < n_features; j++) {
-			x[i][j+1]=train_data[i].first[j];
-		}
+			mu0 = mu0 + (1 - t[i][0])*x[i];
+		}		
 	}
-	Matrix<double> mu0 = Matrix<double>(n, n_features+1);	
-	Matrix<double> mu1 = Matrix<double>(n, n_features+1);
-	mu0 = (sum0/n0)*x;
-	mu1 = (sum1/n1)*x;
+	mu1 = (1.0 / n1) * mu1;
+	mu0 = (1.0 / n0) * mu0;
+
+	std::cout << mu0 << '\n' << mu1 << '\n';
+
 	//Calculation of covariance S
-	Matrix<double> s0 = Matrix<double>(n_features+1, n_features+1);
-	Matrix<double> s1 = Matrix<double>(n_features+1, n_features+1);
-	Matrix<double> s = Matrix<double>(n_features+1, n_features+1);
-	for(int i = 0; i < n_features + 1; i++) {
-		for(int j = 0; j < n_features + 1; j++) {
-			s0[i][j] = 0;
-			s1[i][j] = 0;
-			for(int k = 0; k < n; k++) {
-				if(outputs[k][0]) {
-					s0[i][j] +=  (x[i][k]-mu0[i][k])*(x[k][j]-mu0[k][j]);
-				}
-				else {
-					s1[i][j] += (x[i][k]-mu1[i][k])*(x[k][j]-mu1[k][j]);
-				}
-			}
+	Matrix<double> s1(n_features, n_features);
+	Matrix<double> s0(n_features, n_features);
+	Matrix<double> s(n_features, n_features);
+	Matrix<double> precise(n_features, n_features);
+	for(int i = 0; i < n; i++) {
+		if(t[i][0]) {
+			s1 = s1 + (x[i]-mu1)*((x[i]-mu1).Transpose());			
+		}
+		else {
+			s0 = s0 + (x[i]-mu0)*((x[i]-mu0).Transpose());
 		}
 	}
-	s = (1/(double)n)*(s0+s1);
+	double pc1 = n1*1.0/n, pc0 = n0*1.0/n;
+	Matrix<double> wo(1,1);
+	s = (1.0/n)*(s0+s1);
+	precise = s.inverse();
+	w0=0;
+	w = precise*(mu1 - mu0);
+	wo = 0.5*(mu0.Transpose()*precise*mu0 - mu1.Transpose()*precise*mu1);
+	w0 = log(pc1/pc0) + wo[0][0];
+
+	// std::cout << w << '\n' << w0 << '\n';
 }
 
 void LogisticRegression::train(std::vector<instance>& train_data){
@@ -114,6 +144,16 @@ void LogisticRegression::train(std::vector<instance>& train_data){
 
 }
 
+Matrix<double> ProbGenClassifier::sigmoid(Matrix<double>& d){
+    Matrix<double> m=d;
+    for(int i=0;i<m.n_rows();i++){
+        for(int j=0;j<m.n_cols();j++){
+            m[i][j]=1/(1+exp(-m[i][j]));
+        }
+    }
+    return m;
+}
+
 Matrix<double> LogisticRegression::sigmoid(Matrix<double>& d){
     Matrix<double> m=d;
     for(int i=0;i<m.n_rows();i++){
@@ -141,5 +181,10 @@ int LogisticRegression::classify(attr& ist){
 
 
 int ProbGenClassifier::classify(attr& ist){
-	return 0;
+	Matrix<double> x(n_features, 1);
+	for(int i = 0; i < n_features; i++) {
+		x[i][0] = ist[i];
+	}
+	double res = (w.Transpose()*x)[0][0]+w0;
+	return res>=0.5;
 }

@@ -26,9 +26,18 @@ int main(){
 	//train.push_back(make_pair(vector<double>({0.5,0.5}),1));
 	//train.push_back(make_pair(vector<double>({-0.5,-0.5}), 0));
 	LogisticRegression l1(n_features);
-	l1.train(train);
-	l1.test(train);
-	l1.test(test);
+	ProbGenClassifier p1(n_features);
+	p1.train(train);
+	p1.test(test);
+	/*cout<<"\n---------------------------------\n";
+	for(auto i: train) {
+		for(auto j: i.first) {
+			cout<<j<<',';
+		}
+		cout<<'\n';
+	}*/
+	/*l1.test(train);
+	l1.test(test);*/
 	//auto e1=vector<double>({-0.5,-0.5});
 	//cout<<l1.classify(e1);
 	return 0;

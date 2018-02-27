@@ -142,19 +142,6 @@ Matrix<T> Matrix<T>::operator= (const Matrix<T>& b) {
     return *this;
 }
 
-/*template<typename T>
-Matrix<T> Matrix<T>::operator= (std::initializer_list<T> b) {
-	int idx = 0;
-	cout << v[0].size() << ' ' << v.size() << endl;
-	for(int i=0;i<numrows;i++) {
-		for(int j=0;j<numcols;j++) {
-			v[i][j] = 1;
-		}
-		std::cout << "hi\n";
-	}
-	cout << "donee" << endl;
- }*/
-
 template<typename T>
 Matrix<T> operator* (const Matrix<T>& a, const Matrix<T>& b) {
     Matrix<T> c(a.numrows,b.numcols);
