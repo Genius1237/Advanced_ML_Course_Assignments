@@ -42,6 +42,10 @@ public:
     friend Matrix<TT> operator* (const double a, const Matrix<TT>&b);
     template<class TT>
     friend std::ostream& operator<< (std::ostream&, const Matrix<TT>& a);
+
+    //static Matrix<T> sigmoid(const Matrix<T>&);
+    //static Matrix<T> exp(const Matrix<T> &);
+    //static Matrix<T> log(const Matrix<T> &);
 };
 //Note: This assumes there will be NO dimension mismatches, 
 //Such exceptions can lead to undefined behaviour, mainly Segmentation Faults.
@@ -147,6 +151,9 @@ Matrix<T> Matrix<T>::operator= (const Matrix<T>& b) {
 
 template<typename T>
 Matrix<T> operator* (const Matrix<T>& a, const Matrix<T>& b) {
+    if(a.numcols!=b.numrows){
+        throw "Matrix Dimension Mismatch";
+    }
     Matrix<T> c(a.numrows,b.numcols);
     for(int i = 0;i < a.numrows;i++) {
         for(int j = 0;j < b.numcols; j++) {
@@ -315,5 +322,7 @@ T Matrix<T>::norm2()
 	return euclidNorm();
 }
 
-
+Matrix<double> sigmoid(const Matrix<double>&);
+Matrix<double> exp(const Matrix<double> &);
+Matrix<double> log(const Matrix<double> &);
 #endif
