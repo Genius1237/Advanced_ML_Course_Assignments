@@ -26,6 +26,8 @@ public:
     int n_rows();
     int n_cols();
     T sum();
+    Matrix<T> row_sum();
+    Matrix<T> col_sum();
     T det();
 
     template<class TT>
@@ -211,6 +213,28 @@ T Matrix<T>::sum(){
     return sum;
 }
 
+template <typename T>
+Matrix<T> Matrix<T>::row_sum(){
+    Matrix<T> sum(numrows,1);
+    for (int i = 0; i < numrows; i++){
+        for (int j = 0; j < numcols; j++){
+            sum[i][0] += v[i][j];
+        }
+    }
+    return sum;
+}
+
+template <typename T>
+Matrix<T> Matrix<T>::col_sum(){
+    Matrix<T> sum(1,numcols);
+    for (int i = 0; i < numrows; i++){
+        for (int j = 0; j < numcols; j++){
+            sum[0][j] += v[i][j];
+        }
+    }
+    return sum;
+}
+
 template<typename T>
 void Matrix<T>::cofactor(Matrix<T> a, Matrix<T>& temp, int xrow, int xcol, int n) {
 	if(n==1) {
@@ -323,6 +347,7 @@ T Matrix<T>::norm2()
 }
 
 Matrix<double> sigmoid(const Matrix<double>&);
+Matrix<double> sigmoiddrv(const Matrix<double> &);
 Matrix<double> exp(const Matrix<double> &);
 Matrix<double> log(const Matrix<double> &);
 #endif

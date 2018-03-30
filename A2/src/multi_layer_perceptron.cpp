@@ -66,60 +66,64 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data){
 
 void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_size)
 {   
-    /*
-    for(int i=0;i<n_layers-1;i++){
-        for(int j=0;j<weights[i].n_rows();j++){
-            for(int k=0;k<weights[i].n_cols();k++){
-                weights[i][j][k]=1;
+    //DO RANDOM INITIALIZATION OF WEIGHTS IN RANGE (0,1)
+    for(int k=0;k<no_batches;k++){
+        /*
+        THINGS TO POPULATE
+        no_batches -> number of batches
+        curr_batch_size -> current batch size
+        batch_inputs,batch_outputs -> training data for current batch. It should be a vector<instance>
+        */
+        std::vector<Matrix<double>> values,errors;
+        for(int i=0;i<n_layers-1;i++){
+            values.push_back(Matrix<double>(layers_desc[i]+1,curr_batch_size));
+            errors.push_back(Matrix<double>(layers_desc[i],1));
+        }
+        values.push_back(Matrix<double>(layers_desc[n_layers - 1], curr_batch_size));
+        errors.push_back(Matrix<double>(layers_desc[n_layers - 1], 1));
+
+        //Feedforward
+        for(int j=0;j<curr_batch_size;j++){
+            values[0][0][j]=1;
+            for(int l=0;l<layers_desc[0];l++){
+                values[0][l+1][j]=batch_inputs[j][l][0];
             }
         }
-    }
-    */
-    /*
-    double learning_rate=0.003;
-    
-    int n=train_data.size();
-    Matrix<double> inputs=Matrix<double>(n,n_features+1);
-    Matrix<double> outputs=Matrix<double>(n,1);
-    for(int i=0;i<n;i++){
-        outputs[i][0]=train_data[i].second;
-        inputs[i][0]=1;
-        for(int j=0;j<n_features;j++){
-            inputs[i][j+1]=train_data[i].first[j];
-        }   
-    }
 
-    std::function<Matrix<double>(Matrix<double>)> feed_forward=[&](Matrix<double> w){
-        Matrix<double> m = inputs * w;
-        return sigmoid(m);
-    };
+        Matrix<double> temp=weights[0]*values[0];
+        
+        for(int i=1;i<n_layers-1;i++){
 
-    
-    std::function<std::pair<double, Matrix<double>>(Matrix<double>)>back_prop = [&](Matrix<double> w) {
-        Matrix<double> y = feed_forward(w);
-        //Cross Entropy Error Function
-        double error = 0;
-        for (int i = 0; i < n; i++){
-            if(outputs[i][0]==0){
-                error+=log(1-y[i][0]);
-            }else{
-                error+=log(y[i][0]);
+            for (int j = 0; j < curr_batch_size; j++){
+                values[i][0][j] = 1;
+                for (int l = 0; l < layers_desc[0]; l++){
+                    values[i][l + 1][j] = temp[l-1][j];
+                }
+            }
+
+            temp = weights[i] * sigmoid(values[i]);
+            //temp stores unaugmented values
+            //In the next iteration, it is augmented
+
+        }
+        values[n_layers-1]=temp;
+        //Feedforward over
+        
+        double batch_error = (sigmoid(values[n_layers-1]) - batch_outputs).sum();
+
+        errors[n_layers-1] = (sigmoid(values[n_layers-1]) - batch_outputs).rowsum();
+        
+        for(int i=n_layers-2;i>=0;i--){
+            temp=weights[i].Transpose()*errors[i+1];
+            temp=temp.Transpose()*sigmoiddrv(values[i]);
+            for(int k=0;k<layers_desc[i];k++){
+                errors[i][k][0]=temp[k+1][0];
             }
         }
-        Matrix<double> dv(n_features+1,1);
-        Matrix<double> temp=y-outputs;
-        //std::cout<<temp<<std::endl;
-        for(int i=0;i<n;i++){
-            for(int j=0;j<n_features+1;j++){
-                dv[j][0]+=inputs[i][j]*(temp)[i][0];
-            }
-        }
-        return std::make_pair(-error, dv);
-    };
 
-    weights = gradient_descent_optimizer(back_prop, n_features + 1, learning_rate);
-    // std::cout<<weights<<std::endl;
-    */
+        //derivative of error w.r.t weights[i]=errors[i+1]*sigmoid(values[i].Transpose())
+        //NOW YOU HAVE TO UPDATE THE WEIGHTS
+    }    
 }
 
 int MultiLayerPerceptron::classify(attr &ist)
