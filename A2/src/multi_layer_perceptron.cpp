@@ -2,6 +2,9 @@
 //#include "utilities.h"
 #include <functional>
 #include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include <random>
 
 ClassificationModel::ClassificationModel(int n_features)
 {
@@ -67,6 +70,24 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data){
 void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_size)
 {   
     //DO RANDOM INITIALIZATION OF WEIGHTS IN RANGE (0,1)
+    int size = this->weights.size();
+    std::random_device ram;
+    std::default_random_engine gen{ram()};
+    std::uniform_real_distribution<double> dist(0.000,1.000);
+    for(int i=0;i<size;i++)
+    {
+    	for(int j=0;j<this->weights[i].n_rows();j++)
+    	{
+    		for(int k=0;k<this->weights[i].n_cols();k++)
+    		{
+    			this->weights[i][j][k] = (double)dist(gen);
+    		}
+    	}
+    }
+
+    int no_batches = ceil(train_data.size()*1.0000/batch_size);
+    size = train_data.size();
+    int cind = 0;
     for(int k=0;k<no_batches;k++){
         /*
         THINGS TO POPULATE
@@ -74,6 +95,18 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
         curr_batch_size -> current batch size
         batch_inputs,batch_outputs -> training data for current batch. It should be a vector<instance>
         */
+        int curr_batch_size = batch_size;
+        if(size<batch_size)
+        {
+        	curr_batch_size = size;
+        }
+        std::vector<instance> batch_inputs, batch_outputs;
+        for(int i=0;i<curr_batch_size;i++)
+        {
+        	batch_inputs.push_back(train_data[i+cind]);
+        }
+        size-=batch_size;
+        cind+=curr_batch_size;
         std::vector<Matrix<double>> values,errors;
         for(int i=0;i<n_layers-1;i++){
             values.push_back(Matrix<double>(layers_desc[i]+1,curr_batch_size));
@@ -87,7 +120,7 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
         for(int j=0;j<curr_batch_size;j++){
             values[0][0][j]=1;
             for(int l=0;l<layers_desc[0];l++){
-                values[0][l+1][j]=batch_inputs[j][l][0];
+                values[0][l+1][j]=batch_inputs[j].first[l];
             }
         }
 
@@ -98,7 +131,7 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
             for (int j = 0; j < curr_batch_size; j++){
                 values[i][0][j] = 1;
                 for (int l = 0; l < layers_desc[0]; l++){
-                    values[i][l + 1][j] = temp[l-1][j];
+                    values[i][l + 1][j] = temp[l][j];
                 }
             }
 
