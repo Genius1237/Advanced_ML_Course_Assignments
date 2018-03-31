@@ -78,6 +78,7 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
         for(int i=0;i<n_layers-1;i++){
             values.push_back(Matrix<double>(layers_desc[i]+1,curr_batch_size));
             errors.push_back(Matrix<double>(layers_desc[i],1));
+            //values stores the value at a neuron WITHOUT activation
         }
         values.push_back(Matrix<double>(layers_desc[n_layers - 1], curr_batch_size));
         errors.push_back(Matrix<double>(layers_desc[n_layers - 1], 1));
