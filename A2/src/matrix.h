@@ -34,6 +34,10 @@ public:
     friend Matrix<TT> operator+ (const Matrix<TT>& a, const Matrix<TT>& b);
     template<class TT>
     friend Matrix<TT> operator- (const Matrix<TT>& a, const Matrix<TT>& b);
+    template<class TT>
+    friend Matrix<TT> operator+ (const Matrix<TT>& a, std::vector<TT>& b);
+    template<class TT>
+    friend Matrix<TT> operator- (const Matrix<TT>& a, std::vector<TT>& b);
     template <class TT>
     friend Matrix<TT> operator+ (double a, const Matrix<TT> &b);
     template <class TT>
@@ -103,10 +107,32 @@ Matrix<T> operator+ (const Matrix<T>& a, const Matrix<T>& b) {
 
 template<typename T>
 Matrix<T> operator- (const Matrix<T>& a, const Matrix<T>& b) {
-    Matrix<T> c(b.numrows, b.numcols);
+    std::vector<T> c(b.numrows, b.numcols);
     for(int i = 0; i < a.numrows; i++) {
         for(int j = 0; j < a.numcols; j++) {
             c.v[i][j] = a.v[i][j] - b.v[i][j];
+        }
+    }
+    return c;
+}
+
+template<typename T>
+Matrix<T> operator+ (const Matrix<T>& a, std::vector<T>& b) {
+    Matrix<T> c(a.numrows, b.size());
+     for(int i = 0; i < a.numrows; i++) {
+        for(int j = 0; j < b.size(); j++) {
+            c.v[i][j] = a.v[i][j] + b[j];
+        }
+    }
+    return c;
+}
+
+template<typename T>
+Matrix<T> operator- (const Matrix<T>& a, std::vector<T>& b) {
+    Matrix<T> c(a.numrows, b.size());
+     for(int i = 0; i < a.numrows; i++) {
+        for(int j = 0; j < b.size(); j++) {
+            c.v[i][j] = a.v[i][j] - b[j];
         }
     }
     return c;

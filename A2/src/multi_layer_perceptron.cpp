@@ -154,7 +154,6 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
                 errors[i][k][0]=temp[k+1][0];
             }
         }
-
         //derivative of error w.r.t weights[i]=errors[i+1]*sigmoid(values[i].Transpose())
         //NOW YOU HAVE TO UPDATE THE WEIGHTS
     }    
