@@ -76,13 +76,13 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
     std::uniform_real_distribution<double> dist(0.000,1.000);
     for(int i=0;i<size;i++)
     {
-    	for(int j=0;j<this->weights[i].n_rows();j++)
-    	{
-    		for(int k=0;k<this->weights[i].n_cols();k++)
-    		{
-    			this->weights[i][j][k] = (double)dist(gen);
-    		}
-    	}
+        for(int j=0;j<this->weights[i].n_rows();j++)
+        {
+            for(int k=0;k<this->weights[i].n_cols();k++)
+            {
+                this->weights[i][j][k] = (double)dist(gen);
+            }
+        }
     }
 
     int no_batches = ceil(train_data.size()*1.0000/batch_size);
@@ -98,12 +98,12 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
         int curr_batch_size = batch_size;
         if(size<batch_size)
         {
-        	curr_batch_size = size;
+            curr_batch_size = size;
         }
         std::vector<instance> batch_inputs, batch_outputs;
         for(int i=0;i<curr_batch_size;i++)
         {
-        	batch_inputs.push_back(train_data[i+cind]);
+            batch_inputs.push_back(train_data[i+cind]);
         }
         size-=batch_size;
         cind+=curr_batch_size;
