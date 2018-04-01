@@ -100,10 +100,28 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
         {
         	curr_batch_size = size;
         }
-        std::vector<instance> batch_inputs, batch_outputs;
+        Matrix<double> batch_inputs(curr_batch_size,layers_desc[0]);
+        Matrix<double> batch_outputs(layers_desc[n_layers-1],curr_batch_size);
         for(int i=0;i<curr_batch_size;i++)
         {
-        	batch_inputs.push_back(train_data[i+cind]);
+        	for(int j=0;j<layers_desc[0];j++)
+        	{
+        		batch_inputs[i][j] = train_data[i+cind].first[j];
+        	}
+        }
+        for(int i=0;i<curr_batch_size;i++)
+        {
+        	for(int j=0;j<layers_desc[n_layers-1];j++)
+        	{
+        		if(train_data[i+cind].second==j)
+        		{
+        			batch_outputs[i][j] = 1;
+        		}
+        		else
+        		{
+        			batch_outputs[i][j] = 0;
+        		}
+        	}
         }
         size-=batch_size;
         cind+=curr_batch_size;
@@ -120,7 +138,7 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
         for(int j=0;j<curr_batch_size;j++){
             values[0][0][j]=1;
             for(int l=0;l<layers_desc[0];l++){
-                values[0][l+1][j]=batch_inputs[j].first[l];
+                values[0][l+1][j]=batch_inputs[j][l];
             }
         }
 
