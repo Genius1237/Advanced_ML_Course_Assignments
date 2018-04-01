@@ -100,13 +100,15 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
         {
             curr_batch_size = size;
         }
-        Matrix<double> batch_inputs(curr_batch_size,layers_desc[0]);
+
+        Matrix<double> batch_inputs(layers_desc[0],curr_batch_size);
         Matrix<double> batch_outputs(layers_desc[n_layers-1],curr_batch_size);
-        for(int i=0;i<curr_batch_size;i++)
+        
+		for(int i=0;i<curr_batch_size;i++)
         {
         	for(int j=0;j<layers_desc[0];j++)
         	{
-        		batch_inputs[i][j] = train_data[i+cind].first[j];
+        		batch_inputs[j][i] = train_data[i+cind].first[j];
         	}
         }
         for(int i=0;i<curr_batch_size;i++)
@@ -115,11 +117,11 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
         	{
         		if(train_data[i+cind].second==j)
         		{
-        			batch_outputs[i][j] = 1;
+        			batch_outputs[j][i] = 1;
         		}
         		else
         		{
-        			batch_outputs[i][j] = 0;
+        			batch_outputs[j][i] = 0;
         		}
         	}
         }
@@ -127,7 +129,7 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
         cind+=curr_batch_size;
 
         std::vector<Matrix<double>> values,errors;
-        for(int i=0;i<n_layers-1;i++){
+        for(int i=0;i<n_layers;i++){
             values.push_back(Matrix<double>(layers_desc[i],curr_batch_size));
             errors.push_back(Matrix<double>(layers_desc[i],1));
             //values stores the value at a neuron WITHOUT activation
@@ -140,7 +142,7 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
 		for(int j=0;j<curr_batch_size;j++){
 			temp[0][batch_size]=1;
             for(int l=0;l<layers_desc[0];l++){
-                values[0][l][j]=batch_inputs[j][l];
+                values[0][l][j]=batch_inputs[l][j];
 				temp[l+1][j]=values[0][l][j];
             }
         }
@@ -162,17 +164,17 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
         values[n_layers-1]=weights[n_layers-2]*temp;
         //Feedforward over
 
-		double batch_error = -(((batch_outputs.Transpose() * (log(sigmoid(values[n_layers - 1])))) + ((1 - batch_outputs).Transpose() * (log(sigmoid(1 - values[n_layers - 1]))))).sum());
-
-        errors[n_layers-1] = (sigmoid(values[n_layers-1]) - batch_outputs).row_sum();
-
+		//double batch_error = -(((batch_outputs.Transpose() * (mlog(sigmoid(values[n_layers - 1])))) + ((1 - batch_outputs).Transpose() * (mlog(sigmoid(1 - values[n_layers - 1]))))).sum());
+		
+        //errors[n_layers-1] = (sigmoid(values[n_layers-1]) - batch_outputs).row_sum();
+		/*
         for(int i=n_layers-2;i>=0;i--){
             temp=weights[i].Transpose()*errors[i+1];
             temp=temp.Transpose()*sigmoiddrv(values[i]);
             for(int k=0;k<layers_desc[i];k++){
                 errors[i][k][0]=temp[k+1][0];
             }
-        }
+        }*/
         //derivative of error w.r.t weights[i]=errors[i+1]*sigmoid(values[i].Transpose())
         //NOW YOU HAVE TO UPDATE THE WEIGHTS
     }    
