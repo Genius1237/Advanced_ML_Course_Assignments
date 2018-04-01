@@ -125,46 +125,47 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
         }
         size-=batch_size;
         cind+=curr_batch_size;
+
         std::vector<Matrix<double>> values,errors;
         for(int i=0;i<n_layers-1;i++){
-            values.push_back(Matrix<double>(layers_desc[i]+1,curr_batch_size));
+            values.push_back(Matrix<double>(layers_desc[i],curr_batch_size));
             errors.push_back(Matrix<double>(layers_desc[i],1));
             //values stores the value at a neuron WITHOUT activation
         }
-        values.push_back(Matrix<double>(layers_desc[n_layers - 1], curr_batch_size));
-        errors.push_back(Matrix<double>(layers_desc[n_layers - 1], 1));
 
         //Feedforward
-        for(int j=0;j<curr_batch_size;j++){
-            values[0][0][j]=1;
+
+        Matrix<double> temp(layers_desc[0]+1,batch_size);
+        
+		for(int j=0;j<curr_batch_size;j++){
+			temp[0][batch_size]=1;
             for(int l=0;l<layers_desc[0];l++){
-                values[0][l+1][j]=batch_inputs[j][l];
+                values[0][l][j]=batch_inputs[j][l];
+				temp[l+1][j]=values[0][l][j];
             }
         }
-
-        Matrix<double> temp=weights[0]*values[0];
         
         for(int i=1;i<n_layers-1;i++){
+			values[i]=weights[i-1]*temp;
 
             for (int j = 0; j < curr_batch_size; j++){
-                values[i][0][j] = 1;
-                for (int l = 0; l < layers_desc[0]; l++){
-                    values[i][l + 1][j] = temp[l][j];
+                temp[0][j] = 1;
+                Matrix<double> temp1=sigmoid(values[i]);
+
+                temp[0][j]=1;
+				for(int l = 0; l < layers_desc[i]; l++){
+					temp[l+1][j]=temp1[l][j];
                 }
             }
-
-            temp = weights[i] * sigmoid(values[i]);
-            //temp stores unaugmented values
-            //In the next iteration, it is augmented
-
         }
-        values[n_layers-1]=temp;
+        values[n_layers-1]=weights[n_layers-2]*temp;
         //Feedforward over
         
         double batch_error = (sigmoid(values[n_layers-1]) - batch_outputs).sum();
 
-        errors[n_layers-1] = (sigmoid(values[n_layers-1]) - batch_outputs).rowsum();
+        errors[n_layers-1] = (sigmoid(values[n_layers-1]) - batch_outputs).row_sum();
         
+		
         for(int i=n_layers-2;i>=0;i--){
             temp=weights[i].Transpose()*errors[i+1];
             temp=temp.Transpose()*sigmoiddrv(values[i]);
