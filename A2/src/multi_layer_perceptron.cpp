@@ -151,7 +151,8 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
             for (int j = 0; j < curr_batch_size; j++){
                 temp[0][j] = 1;
                 Matrix<double> temp1=sigmoid(values[i]);
-
+				
+				temp=Matrix<double>(layers_desc[i]+1,1);
                 temp[0][j]=1;
 				for(int l = 0; l < layers_desc[i]; l++){
 					temp[l+1][j]=temp1[l][j];
