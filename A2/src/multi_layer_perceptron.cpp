@@ -160,12 +160,11 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
         }
         values[n_layers-1]=weights[n_layers-2]*temp;
         //Feedforward over
-        
-        double batch_error = (sigmoid(values[n_layers-1]) - batch_outputs).sum();
+
+		double batch_error = -(((batch_outputs.Transpose() * (log(sigmoid(values[n_layers - 1])))) + ((1 - batch_outputs).Transpose() * (log(sigmoid(1 - values[n_layers - 1]))))).sum());
 
         errors[n_layers-1] = (sigmoid(values[n_layers-1]) - batch_outputs).row_sum();
-        
-		
+
         for(int i=n_layers-2;i>=0;i--){
             temp=weights[i].Transpose()*errors[i+1];
             temp=temp.Transpose()*sigmoiddrv(values[i]);
