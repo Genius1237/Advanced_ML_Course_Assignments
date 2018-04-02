@@ -104,26 +104,26 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
         Matrix<double> batch_inputs(layers_desc[0],curr_batch_size);
         Matrix<double> batch_outputs(layers_desc[n_layers-1],curr_batch_size);
         
-		for(int i=0;i<curr_batch_size;i++)
+        for(int i=0;i<curr_batch_size;i++)
         {
-        	for(int j=0;j<layers_desc[0];j++)
-        	{
-        		batch_inputs[j][i] = train_data[i+cind].first[j];
-        	}
+            for(int j=0;j<layers_desc[0];j++)
+            {
+                batch_inputs[j][i] = train_data[i+cind].first[j];
+            }
         }
         for(int i=0;i<curr_batch_size;i++)
         {
-        	for(int j=0;j<layers_desc[n_layers-1];j++)
-        	{
-        		if(train_data[i+cind].second==j)
-        		{
-        			batch_outputs[j][i] = 1;
-        		}
-        		else
-        		{
-        			batch_outputs[j][i] = 0;
-        		}
-        	}
+            for(int j=0;j<layers_desc[n_layers-1];j++)
+            {
+                if(train_data[i+cind].second==j)
+                {
+                    batch_outputs[j][i] = 1;
+                }
+                else
+                {
+                    batch_outputs[j][i] = 0;
+                }
+            }
         }
         size-=batch_size;
         cind+=curr_batch_size;
@@ -139,42 +139,42 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
 
         Matrix<double> temp(layers_desc[0]+1,batch_size);
         
-		for(int j=0;j<curr_batch_size;j++){
-			temp[0][batch_size]=1;
+        for(int j=0;j<curr_batch_size;j++){
+            temp[0][batch_size]=1;
             for(int l=0;l<layers_desc[0];l++){
                 values[0][l][j]=batch_inputs[l][j];
-				temp[l+1][j]=values[0][l][j];
+                temp[l+1][j]=values[0][l][j];
             }
         }
         
         for(int i=1;i<n_layers-1;i++){
-			values[i]=weights[i-1]*temp;
+            values[i]=weights[i-1]*temp;
 
             for (int j = 0; j < curr_batch_size; j++){
                 temp[0][j] = 1;
                 Matrix<double> temp1=sigmoid(values[i]);
-				
-				temp=Matrix<double>(layers_desc[i]+1,1);
+                
+                temp=Matrix<double>(layers_desc[i]+1,1);
                 temp[0][j]=1;
-				for(int l = 0; l < layers_desc[i]; l++){
-					temp[l+1][j]=temp1[l][j];
+                for(int l = 0; l < layers_desc[i]; l++){
+                    temp[l+1][j]=temp1[l][j];
                 }
             }
         }
-        values[n_layers-1]=weights[n_layers-2]*temp;
+        values[n_layers-1] = weights[n_layers-2]*temp;
         //Feedforward over
 
-		//double batch_error = -(((batch_outputs.Transpose() * (mlog(sigmoid(values[n_layers - 1])))) + ((1 - batch_outputs).Transpose() * (mlog(sigmoid(1 - values[n_layers - 1]))))).sum());
-		
-        //errors[n_layers-1] = (sigmoid(values[n_layers-1]) - batch_outputs).row_sum();
-		/*
+        double batch_error = -(((batch_outputs.Transpose() * (log(sigmoid(values[n_layers - 1])))) + ((1 - batch_outputs).Transpose() * (log(sigmoid(1 - values[n_layers - 1]))))).sum());
+        
+        errors[n_layers-1] = (sigmoid(values[n_layers-1]) - batch_outputs).row_sum();
+        
         for(int i=n_layers-2;i>=0;i--){
             temp=weights[i].Transpose()*errors[i+1];
             temp=temp.Transpose()*sigmoiddrv(values[i]);
             for(int k=0;k<layers_desc[i];k++){
                 errors[i][k][0]=temp[k+1][0];
             }
-        }*/
+        }
         //derivative of error w.r.t weights[i]=errors[i+1]*sigmoid(values[i].Transpose())
         //NOW YOU HAVE TO UPDATE THE WEIGHTS
     }    
@@ -195,7 +195,7 @@ int MultiLayerPerceptron::classify(attr &ist)
         }
         auto t1 = weights[i] *x;
         prev = sigmoid(t1);
-        std::cout<<t1<<prev<<"\n";
+        // std::cout<<t1<<prev<<"\n";
     }
 
     int max=0;

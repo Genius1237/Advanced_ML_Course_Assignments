@@ -96,6 +96,11 @@ std::vector<T>& Matrix<T>::operator[](int index) {
 
 template<typename T>
 Matrix<T> operator+ (const Matrix<T>& a, const Matrix<T>& b) {
+	if((a.numcols != b.numcols)||(a.numrows != b.numrows))
+	{
+		throw "Matrix Dimension mismatch at op + of two matrices";
+	}
+
     Matrix<T> c(b.numrows, b.numcols);
     for(int i = 0; i < a.numrows; i++) {
         for(int j = 0; j < a.numcols; j++) {
@@ -107,7 +112,12 @@ Matrix<T> operator+ (const Matrix<T>& a, const Matrix<T>& b) {
 
 template<typename T>
 Matrix<T> operator- (const Matrix<T>& a, const Matrix<T>& b) {
-    std::vector<T> c(b.numrows, b.numcols);
+	if((a.numcols != b.numcols)||(a.numrows != b.numrows))
+	{
+		throw "Matrix Dimension mismatch at op - of two matrices";
+	}
+
+    Matrix<T> c(b.numrows, b.numcols);
     for(int i = 0; i < a.numrows; i++) {
         for(int j = 0; j < a.numcols; j++) {
             c.v[i][j] = a.v[i][j] - b.v[i][j];
@@ -118,6 +128,10 @@ Matrix<T> operator- (const Matrix<T>& a, const Matrix<T>& b) {
 
 template<typename T>
 Matrix<T> operator+ (const Matrix<T>& a, std::vector<T>& b) {
+	if(a.numcols != b.size())
+	{
+		throw "Matrix Dimension Mismatch at op +";
+	}
     Matrix<T> c(a.numrows, b.size());
      for(int i = 0; i < a.numrows; i++) {
         for(int j = 0; j < b.size(); j++) {
@@ -129,6 +143,10 @@ Matrix<T> operator+ (const Matrix<T>& a, std::vector<T>& b) {
 
 template<typename T>
 Matrix<T> operator- (const Matrix<T>& a, std::vector<T>& b) {
+	if(a.numcols != b.size())
+	{
+		throw "Matrix Dimension Mismatch at op - ";
+	}
     Matrix<T> c(a.numrows, b.size());
      for(int i = 0; i < a.numrows; i++) {
         for(int j = 0; j < b.size(); j++) {
@@ -180,7 +198,7 @@ Matrix<T> Matrix<T>::operator= (const Matrix<T>& b) {
 template<typename T>
 Matrix<T> operator* (const Matrix<T>& a, const Matrix<T>& b) {
     if(a.numcols!=b.numrows){
-        throw "Matrix Dimension Mismatch";
+        throw "Matrix Dimension Mismatch at op * ";
     }
     Matrix<T> c(a.numrows,b.numcols);
     for(int i = 0;i < a.numrows;i++) {
