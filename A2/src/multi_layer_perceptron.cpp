@@ -60,7 +60,8 @@ MultiLayerPerceptron::MultiLayerPerceptron(int n_layers, std::vector<int> &layer
     this->n_layers = n_layers;
     this->layers_desc = layers_desc;
     for(int i=0;i<n_layers-1;i++){
-        weights.push_back(Matrix<double>(layers_desc[i+1],layers_desc[i]+1));
+        weights.push_back(Matrix<double>(layers_desc[i+1],layers_desc[i]));
+		biases.push_back(Matrix<double>(layers_desc[i+1],1));
     }
 }
 void MultiLayerPerceptron::train(std::vector<instance> &train_data){
@@ -131,53 +132,47 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
         std::vector<Matrix<double>> values,errors;
         for(int i=0;i<n_layers;i++){
             values.push_back(Matrix<double>(layers_desc[i],curr_batch_size));
-            errors.push_back(Matrix<double>(layers_desc[i],1));
+            errors.push_back(Matrix<double>(layers_desc[i],curr_batch_size));
             //values stores the value at a neuron WITHOUT activation
         }
 
         //Feedforward
 
-        Matrix<double> temp(layers_desc[0]+1,batch_size);
+        Matrix<double> temp(layers_desc[0],batch_size);
         
         for(int j=0;j<curr_batch_size;j++){
-            temp[0][batch_size]=1;
             for(int l=0;l<layers_desc[0];l++){
                 values[0][l][j]=batch_inputs[l][j];
-                temp[l+1][j]=values[0][l][j];
+                temp[l][j]=values[0][l][j];
             }
         }
         
         for(int i=1;i<n_layers-1;i++){
-            values[i]=weights[i-1]*temp;
-
-            for (int j = 0; j < curr_batch_size; j++){
-                temp[0][j] = 1;
-                Matrix<double> temp1=sigmoid(values[i]);
-                
-                temp=Matrix<double>(layers_desc[i]+1,1);
-                temp[0][j]=1;
-                for(int l = 0; l < layers_desc[i]; l++){
-                    temp[l+1][j]=temp1[l][j];
-                }
-            }
+            values[i]=weights[i-1]*temp ;//+ biases[i-1];
+            temp=sigmoid(values[i]);
         }
-        values[n_layers-1] = weights[n_layers-2]*temp;
+
+        values[n_layers-1] = weights[n_layers-2]*temp ;//+ biases[n_layers-2];
         //Feedforward over
 
-        double batch_error = -(((batch_outputs.Transpose() * (log(sigmoid(values[n_layers - 1])))) + ((1 - batch_outputs).Transpose() * (log(sigmoid(1 - values[n_layers - 1]))))).sum());
-        
-        errors[n_layers-1] = (sigmoid(values[n_layers-1]) - batch_outputs).row_sum();
-        
+        double batch_error = -(((batch_outputs.Transpose() * (log(sigmoid(values[n_layers - 1])))) + ((1 - batch_outputs).Transpose() * (log(sigmoid(1 - values[n_layers - 1]))))).diag_sum());
+
+        errors[n_layers - 1] = sigmoid(values[n_layers - 1]) - batch_outputs;
+
         for(int i=n_layers-2;i>=0;i--){
-            temp=weights[i].Transpose()*errors[i+1];
-            temp=temp.Transpose()*sigmoiddrv(values[i]);
-            for(int k=0;k<layers_desc[i];k++){
-                errors[i][k][0]=temp[k+1][0];
-            }
+            errors[i] = weights[i].Transpose() * errors[i + 1];
+            //std::cout<<temp.shape()<<std::endl;
+
+			errors[i] = errors[i] / sigmoiddrv(values[i]);
         }
-        //derivative of error w.r.t weights[i]=errors[i+1]*sigmoid(values[i].Transpose())
-        //NOW YOU HAVE TO UPDATE THE WEIGHTS
-    }    
+		
+		//for(int i=0;i<n_layers-1;i++)
+            //std::cout << (errors[i + 1] * sigmoid(values[i].Transpose())).shape() <<errors[i + 1].row_sum().shape() << std::endl;
+
+    	//derivative of error w.r.t biases[i] = (1/curr_batch_size)*(errors[i+1].row_sum())
+		//derivative of error w.r.t weights[i]=(1 / curr_batch_size)*(errors[i + 1] * sigmoid(values[i].Transpose()))
+        //NOW YOU HAVE TO UPDATE THE WEIGHTS AND BIASES
+    }
 }
 
 int MultiLayerPerceptron::classify(attr &ist)
@@ -187,13 +182,7 @@ int MultiLayerPerceptron::classify(attr &ist)
         prev[i][0]=ist[i];
     }   
     for(int i=0;i<n_layers-1;i++){
-        Matrix<double> x(layers_desc[i]+1,1);
-        x[0][0]=1;
-        for (int j = 0; j < layers_desc[i]; j++)
-        {
-            x[j+1][0]=prev[j][0];
-        }
-        auto t1 = weights[i] *x;
+        auto t1 = weights[i] *prev ;//+ biases[i];
         prev = sigmoid(t1);
         // std::cout<<t1<<prev<<"\n";
     }

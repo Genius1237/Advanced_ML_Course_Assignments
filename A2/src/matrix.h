@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <sstream>
 
 template <typename T>
 class Matrix {
@@ -28,7 +29,9 @@ public:
     T sum();
     Matrix<T> row_sum();
     Matrix<T> col_sum();
+    T diag_sum();
     T det();
+    std::string shape() const;
 
     template<class TT>
     friend Matrix<TT> operator+ (const Matrix<TT>& a, const Matrix<TT>& b);
@@ -44,6 +47,8 @@ public:
     friend Matrix<TT> operator- (double a, const Matrix<TT> &b);
     template <class TT>
     friend Matrix<TT> operator*(const Matrix<TT> &a, const Matrix<TT> &b);
+    template <class TT>
+    friend Matrix<TT> operator/(const Matrix<TT>& a, const Matrix<TT>& b);
     template<class TT>
     friend Matrix<TT> operator* (const double a, const Matrix<TT>&b);
     template<class TT>
@@ -94,11 +99,20 @@ std::vector<T>& Matrix<T>::operator[](int index) {
     return v[index];
 }
 
+template <typename T>
+std::string Matrix<T>::shape() const
+{
+    std::stringstream ss;
+    ss<<'('<<numrows<<','<<numcols<<')';
+    return ss.str();
+}
+
 template<typename T>
 Matrix<T> operator+ (const Matrix<T>& a, const Matrix<T>& b) {
 	if((a.numcols != b.numcols)||(a.numrows != b.numrows))
 	{
-		throw "Matrix Dimension mismatch at op + of two matrices";
+        std::cerr << a.shape()<<'+' << b.shape()<<std::endl;
+        throw "Matrix Dimension mismatch at op + of two matrices";
 	}
 
     Matrix<T> c(b.numrows, b.numcols);
@@ -114,7 +128,8 @@ template<typename T>
 Matrix<T> operator- (const Matrix<T>& a, const Matrix<T>& b) {
 	if((a.numcols != b.numcols)||(a.numrows != b.numrows))
 	{
-		throw "Matrix Dimension mismatch at op - of two matrices";
+        std::cerr << a.shape()<<'-' << b.shape()<<std::endl;
+        throw "Matrix Dimension mismatch at op - of two matrices";
 	}
 
     Matrix<T> c(b.numrows, b.numcols);
@@ -145,7 +160,7 @@ template<typename T>
 Matrix<T> operator- (const Matrix<T>& a, std::vector<T>& b) {
 	if(a.numcols != b.size())
 	{
-		throw "Matrix Dimension Mismatch at op - ";
+        throw "Matrix Dimension Mismatch at op - ";
 	}
     Matrix<T> c(a.numrows, b.size());
      for(int i = 0; i < a.numrows; i++) {
@@ -197,7 +212,9 @@ Matrix<T> Matrix<T>::operator= (const Matrix<T>& b) {
 
 template<typename T>
 Matrix<T> operator* (const Matrix<T>& a, const Matrix<T>& b) {
-    if(a.numcols!=b.numrows){
+
+    if (a.numcols != b.numrows) {
+        std::cerr << a.shape() << '*' << b.shape() << std::endl;
         throw "Matrix Dimension Mismatch at op * ";
     }
     Matrix<T> c(a.numrows,b.numcols);
@@ -207,6 +224,22 @@ Matrix<T> operator* (const Matrix<T>& a, const Matrix<T>& b) {
             for(int k = 0;k < a.numcols;k++) {
                 c.v[i][j] += a.v[i][k]*b.v[k][j];
             }
+        }
+    }
+    return c;
+}
+
+template<typename T>
+Matrix<T> operator/ (const Matrix<T>& a, const Matrix<T>& b) {
+
+    if((a.numcols != b.numcols)||(a.numrows != b.numrows)){
+        std::cerr << a.shape() << '*' << b.shape() << std::endl;
+        throw "Matrix Dimension Mismatch at op / ";
+    }
+    Matrix<T> c(a.numrows,a.numcols);
+    for(int i = 0;i < a.numrows;i++) {
+        for(int j = 0;j < a.numcols; j++) {
+            c.v[i][j]=a.v[i][j]*b.v[i][j];
         }
     }
     return c;
@@ -275,6 +308,19 @@ Matrix<T> Matrix<T>::col_sum(){
         for (int j = 0; j < numcols; j++){
             sum[0][j] += v[i][j];
         }
+    }
+    return sum;
+}
+
+template <typename T>
+T Matrix<T>::diag_sum(){
+    if(numrows!=numcols){
+        std::cout<<shape()<<std::endl;
+        throw "Not a diagonal matrix";
+    }
+    T sum=0;
+    for (int i = 0; i < numrows; i++) {
+        sum+=v[i][i];
     }
     return sum;
 }
