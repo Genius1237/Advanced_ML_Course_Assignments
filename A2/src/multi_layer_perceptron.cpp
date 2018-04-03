@@ -60,7 +60,7 @@ MultiLayerPerceptron::MultiLayerPerceptron(int n_layers, std::vector<int> &layer
     this->n_layers = n_layers;
     this->layers_desc = layers_desc;
     for(int i=0;i<n_layers-1;i++){
-        weights.push_back(Matrix<double>(layers_desc[i+1],layers_desc[i]));
+        weights.push_back(Matrix<double>(layers_desc[i + 1],layers_desc[i]));
         biases.push_back(Matrix<double>(layers_desc[i + 1], 1));
         /*velocity.push_back(Matrix<double>(layers_desc[i + 1], layers_desc[i]));
         gradient_sum.push_back(Matrix<double>(layers_desc[i+1],layers_desc[i]));*/
@@ -84,6 +84,14 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
             {
                 weights[i][j][k] = (double)dist(gen);
             }
+        }
+    }
+
+    for(int i=0;i<n_layers-1;i++)
+    {
+        for(int j=0;j<biases[i].n_rows();j++)
+        {
+                biases[i][j][0] = (double)dist(gen);
         }
     }
 
@@ -159,11 +167,12 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
             }
 
             for(int i=1;i<n_layers-1;i++){
-                values[i]=weights[i-1]*temp; //+ biases[i-1];
+                values[i] = (weights[i-1] * temp) + biases[i-1];
                 temp=sigmoid(values[i]);
             }
 
-            values[n_layers-1] = weights[n_layers-2]*temp; // + biases[n_layers-2];
+
+            values[n_layers-1] = (weights[n_layers-2] * temp) + biases[n_layers-2];
             //Feedforward over
 
             double batch_error = -(((batch_outputs.Transpose() * (log(sigmoid(values[n_layers - 1])))) + ((1 - batch_outputs).Transpose() * (log(sigmoid(1 - values[n_layers - 1]))))).diag_sum());
@@ -205,7 +214,7 @@ int MultiLayerPerceptron::classify(attr &ist)
         prev[i][0]=ist[i];
     }   
     for(int i=0;i<n_layers-1;i++){
-        auto t1 = weights[i] * prev;// + biases[i];
+        auto t1 = weights[i] * prev + biases[i];
         prev = sigmoid(t1);
         // std::cout<<t1<<prev<<"\n";
     }

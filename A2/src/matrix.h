@@ -72,7 +72,17 @@ template<typename T>
 Matrix<T>::Matrix(const Matrix<T>& a) {
     this -> numrows = a.numrows;
     this -> numcols = a.numcols;
-    this -> v = a.v;
+    int sz = v.size();
+    for(int i = 0; i < sz; i++) {
+        this -> v[i].clear();
+    }
+    this -> v.clear();
+    this -> v.resize(a.numrows);
+    for(int i = 0; i < a.numrows; i++) {
+        for(int j = 0; j < a.numcols; j++) {
+            this -> v[i].push_back(a.v[i][j]);
+        }
+    }
 }
 
 template<typename T>
@@ -217,7 +227,16 @@ Matrix<T> Matrix<T>::operator= (const Matrix<T>& b) {
     if(this != &b) {
         this -> numrows = b.numrows;
         this -> numcols = b.numcols;
-        this -> v = b.v;
+        for(int i = 0; i < b.numcols; i++) {
+            this -> v[i].clear();
+        }
+        this -> v.clear();
+        v.resize(b.numrows);
+        for(int i = 0; i < b.numrows; i++) {
+            for(int j = 0; j < b.numcols; j++) {
+                this -> v[i].push_back(b.v[i][j]);
+            }
+        }
     }
     return *this;
 }
