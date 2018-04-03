@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <cassert>
 #include <sstream>
 
 template <typename T>
@@ -79,6 +80,7 @@ Matrix<T>::Matrix(const Matrix<T>& a) {
     this -> v.clear();
     this -> v.resize(a.numrows);
     for(int i = 0; i < a.numrows; i++) {
+        this->v[i].resize(a.numcols);
         for(int j = 0; j < a.numcols; j++) {
             this -> v[i].push_back(a.v[i][j]);
         }
@@ -119,50 +121,51 @@ std::string Matrix<T>::shape() const
 
 template<typename T>
 Matrix<T> operator+ (const Matrix<T>& a, const Matrix<T>& b) {
-    if((a.numcols != b.numcols && b.numcols != 1)||(a.numrows != b.numrows))
-    {
+    if((a.numcols==b.numcols&&a.numrows==b.numrows)){
+        Matrix<T> c(a.numrows, a.numcols);
+        for(int i = 0; i < a.numrows; i++) {
+            for(int j = 0; j < a.numcols; j++) {
+                c.v[i][j] = a.v[i][j] + b.v[i][j];
+            }
+        }
+        return c;
+    }else if(a.numrows==b.numrows&&b.numcols==1){
+        Matrix<T> c(a.numrows, a.numcols);
+        for (int i = 0; i < a.numrows; i++) {
+            for (int j = 0; j < a.numcols; j++) {
+                c.v[i][j] = a.v[i][j] + b.v[i][0];
+            }
+        }
+        return c;
+    }else{
         std::cerr << a.shape()<<'+' << b.shape()<<std::endl;
         throw "Matrix Dimension mismatch at op + of two matrices";
     }
-
-    Matrix<T> c(b.numrows, b.numcols);
-    for(int i = 0; i < a.numrows; i++) {
-        for(int j = 0; j < a.numcols; j++) {
-            c.v[i][j] = a.v[i][j] + b.v[i][j];
-        }
-    }
-    for(int i = 0; i < a.numrows; i++) {
-        for(int j = 0; j < a.numcols; j++) {
-            if(b.numcols == 1 && a.numrows == b.numrows) {
-                c.v[i][j] = a.v[i][j] - b.v[i][0];
-            }
-        }
-    }
-    return c;
 }
 
-template<typename T>
-Matrix<T> operator- (const Matrix<T>& a, const Matrix<T>& b) {
-    if((a.numcols != b.numcols && b.numcols != 1)||(a.numrows != b.numrows))
-    {
-        std::cerr << a.shape()<<'-' << b.shape()<<std::endl;
-        throw "Matrix Dimension mismatch at op - of two matrices";
-    }
-
-    Matrix<T> c(b.numrows, b.numcols);
-    for(int i = 0; i < a.numrows; i++) {
-        for(int j = 0; j < a.numcols; j++) {
-            c.v[i][j] = a.v[i][j] - b.v[i][j];
+template <typename T>
+Matrix<T> operator-(const Matrix<T>& a, const Matrix<T>& b)
+{
+    if ((a.numcols == b.numcols && a.numrows == b.numrows)) {
+        Matrix<T> c(a.numrows, a.numcols);
+        for (int i = 0; i < a.numrows; i++) {
+            for (int j = 0; j < a.numcols; j++) {
+                c.v[i][j] = a.v[i][j] - b.v[i][j];
+            }
         }
-    }
-    for(int i = 0; i < a.numrows; i++) {
-        for(int j = 0; j < a.numcols; j++) {
-            if(b.numcols == 1 && a.numrows == b.numrows) {
+        return c;
+    } else if (a.numrows == b.numrows && b.numcols == 1) {
+        Matrix<T> c(a.numrows, a.numcols);
+        for (int i = 0; i < a.numrows; i++) {
+            for (int j = 0; j < a.numcols; j++) {
                 c.v[i][j] = a.v[i][j] - b.v[i][0];
             }
         }
+        return c;
+    } else {
+        std::cerr << a.shape() << '-' << b.shape() << std::endl;
+        throw "Matrix Dimension mismatch at op + of two matrices";
     }
-    return c;
 }
 
 template <typename T>
@@ -227,12 +230,16 @@ Matrix<T> Matrix<T>::operator= (const Matrix<T>& b) {
     if(this != &b) {
         this -> numrows = b.numrows;
         this -> numcols = b.numcols;
-        for(int i = 0; i < b.numcols; i++) {
+        int t=v.size();
+        for(int i = 0; i < t; i++) {
             this -> v[i].clear();
         }
         this -> v.clear();
+        
         v.resize(b.numrows);
+        assert(v.size()==b.numrows);
         for(int i = 0; i < b.numrows; i++) {
+            this->v[i].resize(b.numcols);
             for(int j = 0; j < b.numcols; j++) {
                 this -> v[i].push_back(b.v[i][j]);
             }
