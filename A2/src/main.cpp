@@ -30,7 +30,7 @@ int main(){
 	vector<instance> train=readData("../data/train.txt",n_features);
 	vector<instance> test=readData("../data/test.txt",n_features);
 	//vector<instance> validate = readData("../data/validation.txt", n_features);
-	vector<int> layers={64,3,10};
+	vector<int> layers={64,20,10};
 	vector<instance> v;
 	MultiLayerPerceptron m(layers.size(),layers);
 	m.train(train);

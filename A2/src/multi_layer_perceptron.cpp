@@ -54,6 +54,17 @@ void ClassificationModel::test(std::vector<instance> data)
               << "TN: " << tn << '\n';
 }
 
+void MultiLayerPerceptron::test(std::vector<instance> data){
+    int n = data.size();
+    int correct = 0;
+    for (int i = 0; i < n; i++) {
+        if (classify(data[i].first) == data[i].second) {
+            correct++;
+        }
+    }
+    std::cout << "Accuracy is " << ((double)correct) / n << std::endl;
+}
+
 MultiLayerPerceptron::MultiLayerPerceptron(int n_layers, std::vector<int> &layers_desc) : ClassificationModel(layers_desc[0]){
     this->n_layers = n_layers;
     this->layers_desc = layers_desc;
@@ -99,7 +110,7 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
     int cind = 0;
     int epochs = 0;
     double epsilon = 1e-8;
-    double learning_rate = 0.001;
+    double learning_rate = 0.0003;
     double momentum = 0.9;
     while(epochs < 100){
         //Placeholder - determine actual convergence condition here
@@ -218,8 +229,9 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
 
 int MultiLayerPerceptron::classify(attr &ist)
 {   
-    Matrix<double> prev(ist.size(),1);
-    for(int i=0;i<ist.size();i++){
+    assert(ist.size()==layers_desc[0]);
+    Matrix<double> prev(layers_desc[0], 1);
+    for(int i=0;i<layers_desc[0];i++){
         prev[i][0]=ist[i];
     }   
     for(int i=0;i<n_layers-1;i++){
@@ -229,9 +241,9 @@ int MultiLayerPerceptron::classify(attr &ist)
     }
 
     int max=0;
-    for(int i=1;i<n_layers;i++){
+    for(int i=1;i<layers_desc[n_layers-1];i++){
         if (prev[i][0] > prev[max][0]){
-            max=i;
+			max=i;
         }
     }
     return max;    

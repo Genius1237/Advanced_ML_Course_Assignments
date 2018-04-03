@@ -28,5 +28,6 @@ class MultiLayerPerceptron:public ClassificationModel{
 		void train(std::vector<instance> &);
 		void train(std::vector<instance> &, int);
 		int classify(attr &);
+		void test(std::vector<instance>);
 };
 #endif
