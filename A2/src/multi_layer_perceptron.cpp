@@ -167,11 +167,8 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
             }
 
             for(int i=1;i<n_layers-1;i++){
-                auto t1 = (weights[i - 1] * temp);
-                std::cout<<t1<<"\n"<<biases[i-1]<<"\n";
-				auto t2=t1+biases[i-1];
-				values[i]= t2;
-                temp=sigmoid(values[i]);
+                values[i] = (weights[i - 1] * temp) +biases[i-1];
+                temp = sigmoid(values[i]);
             }
 
 
