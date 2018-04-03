@@ -21,7 +21,7 @@ class ClassificationModel{
 class MultiLayerPerceptron:public ClassificationModel{
 	int n_layers;
 	std::vector<int> layers_desc;
-	std::vector<Matrix<double>> weights, biases, biases,velocity, gradient_sum;
+	std::vector<Matrix<double>> weights, biases;
 
   	public:
 		MultiLayerPerceptron(int, std::vector<int>&);

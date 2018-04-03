@@ -37,14 +37,14 @@ public:
     friend Matrix<TT> operator+ (const Matrix<TT>& a, const Matrix<TT>& b);
     template<class TT>
     friend Matrix<TT> operator- (const Matrix<TT>& a, const Matrix<TT>& b);
-    template<class TT>
-    friend Matrix<TT> operator+ (const Matrix<TT>& a, std::vector<TT>& b);
-    template<class TT>
-    friend Matrix<TT> operator- (const Matrix<TT>& a, std::vector<TT>& b);
     template <class TT>
     friend Matrix<TT> operator+ (double a, const Matrix<TT> &b);
     template <class TT>
+    friend Matrix<TT> operator+ (const Matrix<TT> &b, double a);
+    template <class TT>
     friend Matrix<TT> operator- (double a, const Matrix<TT> &b);
+    template <class TT>
+    friend Matrix<TT> operator- (const Matrix<TT> &b, double a);
     template <class TT>
     friend Matrix<TT> operator*(const Matrix<TT> &a, const Matrix<TT> &b);
     template <class TT>
@@ -109,11 +109,11 @@ std::string Matrix<T>::shape() const
 
 template<typename T>
 Matrix<T> operator+ (const Matrix<T>& a, const Matrix<T>& b) {
-	if((a.numcols != b.numcols)||(a.numrows != b.numrows))
-	{
+    if((a.numcols != b.numcols && b.numcols != 1)||(a.numrows != b.numrows))
+    {
         std::cerr << a.shape()<<'+' << b.shape()<<std::endl;
         throw "Matrix Dimension mismatch at op + of two matrices";
-	}
+    }
 
     Matrix<T> c(b.numrows, b.numcols);
     for(int i = 0; i < a.numrows; i++) {
@@ -121,16 +121,23 @@ Matrix<T> operator+ (const Matrix<T>& a, const Matrix<T>& b) {
             c.v[i][j] = a.v[i][j] + b.v[i][j];
         }
     }
+    for(int i = 0; i < a.numrows; i++) {
+        for(int j = 0; j < a.numcols; j++) {
+            if(b.numcols == 1 && a.numrows == b.numrows) {
+                c.v[i][j] = a.v[i][j] - b.v[i][0];
+            }
+        }
+    }
     return c;
 }
 
 template<typename T>
 Matrix<T> operator- (const Matrix<T>& a, const Matrix<T>& b) {
-	if((a.numcols != b.numcols)||(a.numrows != b.numrows))
-	{
+    if((a.numcols != b.numcols && b.numcols != 1)||(a.numrows != b.numrows))
+    {
         std::cerr << a.shape()<<'-' << b.shape()<<std::endl;
         throw "Matrix Dimension mismatch at op - of two matrices";
-	}
+    }
 
     Matrix<T> c(b.numrows, b.numcols);
     for(int i = 0; i < a.numrows; i++) {
@@ -138,34 +145,11 @@ Matrix<T> operator- (const Matrix<T>& a, const Matrix<T>& b) {
             c.v[i][j] = a.v[i][j] - b.v[i][j];
         }
     }
-    return c;
-}
-
-template<typename T>
-Matrix<T> operator+ (const Matrix<T>& a, std::vector<T>& b) {
-	if(a.numcols != b.size())
-	{
-		throw "Matrix Dimension Mismatch at op +";
-	}
-    Matrix<T> c(a.numrows, b.size());
-     for(int i = 0; i < a.numrows; i++) {
-        for(int j = 0; j < b.size(); j++) {
-            c.v[i][j] = a.v[i][j] + b[j];
-        }
-    }
-    return c;
-}
-
-template<typename T>
-Matrix<T> operator- (const Matrix<T>& a, std::vector<T>& b) {
-	if(a.numcols != b.size())
-	{
-        throw "Matrix Dimension Mismatch at op - ";
-	}
-    Matrix<T> c(a.numrows, b.size());
-     for(int i = 0; i < a.numrows; i++) {
-        for(int j = 0; j < b.size(); j++) {
-            c.v[i][j] = a.v[i][j] - b[j];
+    for(int i = 0; i < a.numrows; i++) {
+        for(int j = 0; j < a.numcols; j++) {
+            if(b.numcols == 1 && a.numrows == b.numrows) {
+                c.v[i][j] = a.v[i][j] - b.v[i][0];
+            }
         }
     }
     return c;
@@ -186,6 +170,20 @@ Matrix<T> operator+(double a, const Matrix<T> &b)
 }
 
 template <typename T>
+Matrix<T> operator+(const Matrix<T> &b, double a)
+{
+    Matrix<T> c(b.numrows, b.numcols);
+    for (int i = 0; i < b.numrows; i++)
+    {
+        for (int j = 0; j < b.numcols; j++)
+        {
+            c.v[i][j] =  b.v[i][j] + a;
+        }
+    }
+    return c;
+}
+
+template <typename T>
 Matrix<T> operator-(double a, const Matrix<T> &b)
 {
     Matrix<T> c(b.numrows, b.numcols);
@@ -194,6 +192,20 @@ Matrix<T> operator-(double a, const Matrix<T> &b)
         for (int j = 0; j < b.numcols; j++)
         {
             c.v[i][j] = a - b.v[i][j];
+        }
+    }
+    return c;
+}
+
+template <typename T>
+Matrix<T> operator-(const Matrix<T> &b, double a)
+{
+    Matrix<T> c(b.numrows, b.numcols);
+    for (int i = 0; i < b.numrows; i++)
+    {
+        for (int j = 0; j < b.numcols; j++)
+        {
+            c.v[i][j] = b.v[i][j] - a;
         }
     }
     return c;
@@ -327,10 +339,10 @@ T Matrix<T>::diag_sum(){
 
 template<typename T>
 void Matrix<T>::cofactor(Matrix<T> a, Matrix<T>& temp, int xrow, int xcol, int n) {
-	if(n==1) {
-		temp.v[0][0] = a.v[0][0];
-		return;
-	}
+    if(n==1) {
+        temp.v[0][0] = a.v[0][0];
+        return;
+    }
     int row_count=0, col_count=0;
     for(int r = 0; r < n; r++) {
         for(int c = 0; c < n; c++) {
@@ -351,7 +363,7 @@ T Matrix<T>::determinant(Matrix<T> a, int n, int N) {
     T sum=0;
     int s=1;
     if(n == 1) {
-    	return a.v[0][0];
+        return a.v[0][0];
     }
     Matrix<T> temp(N,N);
     temp.v.resize(N);
@@ -374,66 +386,66 @@ T Matrix<T>::det(){
 
 template<typename T>
 Matrix<T> Matrix<T>::adjoint(int nrows) {
-	Matrix<T> b(nrows, nrows);
-	if(nrows == 1) {
-		b[0][0]=1;
-		return b;
-	}
-	else {
-		int s = 1;
-		Matrix<T> temp1(nrows, nrows);
-		temp1.v.resize(nrows);
-		for(int i=0;i<nrows;i++)  {
-			temp1.v[i].resize(nrows);
-		}
-		for(int i = 0; i < nrows; i++) {
-			for(int j = 0; j < nrows; j++) {
-				cofactor(*this, temp1, i, j, nrows);
-				s = ((i + j) % 2)?-1 : 1;
-				b.v[j][i] = s*determinant(temp1, nrows-1, nrows);
-			}
-		}
-		return b;
-	}
+    Matrix<T> b(nrows, nrows);
+    if(nrows == 1) {
+        b[0][0]=1;
+        return b;
+    }
+    else {
+        int s = 1;
+        Matrix<T> temp1(nrows, nrows);
+        temp1.v.resize(nrows);
+        for(int i=0;i<nrows;i++)  {
+            temp1.v[i].resize(nrows);
+        }
+        for(int i = 0; i < nrows; i++) {
+            for(int j = 0; j < nrows; j++) {
+                cofactor(*this, temp1, i, j, nrows);
+                s = ((i + j) % 2)?-1 : 1;
+                b.v[j][i] = s*determinant(temp1, nrows-1, nrows);
+            }
+        }
+        return b;
+    }
 }
 
 template<typename T>
 Matrix<T> Matrix<T>::inv(Matrix<T>& a) {
-	if(a.det()) {
-		Matrix<T> b(a.numrows, a.numcols);
-		b = (1/(double)a.det())*a.adjoint(a.numrows);
-		return b;
-	}
-	else {
-		std::cout<<"\nMatrix is singular. Returning the same matrix.\n";
-		return a;
-	}
+    if(a.det()) {
+        Matrix<T> b(a.numrows, a.numcols);
+        b = (1/(double)a.det())*a.adjoint(a.numrows);
+        return b;
+    }
+    else {
+        std::cout<<"\nMatrix is singular. Returning the same matrix.\n";
+        return a;
+    }
 }
 
 template<typename T>
 Matrix<T> Matrix<T>::inverse() {
-	return inv(*this);
+    return inv(*this);
 }
 
 template<typename T>
 T Matrix<T>::euclidNorm()
 {
-	T sum = 0;
-	int i,j;
-	for(i=0;i<this->numrows;i++)
-	{
-		for(j=0;j<this->numcols;j++)
-		{
-			sum = sum + (this->v[i][j])*(this->v[i][j]);
-		}
-	}
-	return sqrt(sum);
+    T sum = 0;
+    int i,j;
+    for(i=0;i<this->numrows;i++)
+    {
+        for(j=0;j<this->numcols;j++)
+        {
+            sum = sum + (this->v[i][j])*(this->v[i][j]);
+        }
+    }
+    return sqrt(sum);
 }
 
 template<typename T>
 T Matrix<T>::norm2()
 {
-	return euclidNorm();
+    return euclidNorm();
 }
 
 Matrix<double> sigmoid(const Matrix<double>&);

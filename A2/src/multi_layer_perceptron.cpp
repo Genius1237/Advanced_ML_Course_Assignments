@@ -62,8 +62,8 @@ MultiLayerPerceptron::MultiLayerPerceptron(int n_layers, std::vector<int> &layer
     for(int i=0;i<n_layers-1;i++){
         weights.push_back(Matrix<double>(layers_desc[i+1],layers_desc[i]));
         biases.push_back(Matrix<double>(layers_desc[i + 1], 1));
-        velocity.push_back(Matrix<double>(layers_desc[i + 1], layers_desc[i]));
-        gradient_sum.push_back(Matrix<double>(layers_desc[i+1],layers_desc[i]));
+        /*velocity.push_back(Matrix<double>(layers_desc[i + 1], layers_desc[i]));
+        gradient_sum.push_back(Matrix<double>(layers_desc[i+1],layers_desc[i]));*/
     }
 }
 void MultiLayerPerceptron::train(std::vector<instance> &train_data){
@@ -73,25 +73,22 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data){
 void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_size)
 {   
     //DO RANDOM INITIALIZATION OF WEIGHTS IN RANGE (0,1)
-    int size = this->weights.size();
     std::random_device ram;
     std::default_random_engine gen{ram()};
     std::uniform_real_distribution<double> dist(0.000,1.000);
-    for(int i=0;i<size;i++)
+    for(int i=0;i<n_layers-1;i++)
     {
-        for(int j=0;j<this->weights[i].n_rows();j++)
+        for(int j=0;j<weights[i].n_rows();j++)
         {
-            for(int k=0;k<this->weights[i].n_cols();k++)
+            for(int k=0;k<weights[i].n_cols();k++)
             {
-                this->weights[i][j][k] = (double)dist(gen);
-                velocity[i][j][k] = 0;
-                gradient_sum[i][j][k] = 1;
+                weights[i][j][k] = (double)dist(gen);
             }
         }
     }
 
     int no_batches = ceil(train_data.size()*1.0000/batch_size);
-    size = train_data.size();
+    int size = train_data.size();
     double prev_batch_error = std::numeric_limits<double>::max();
     int cind = 0;
     int epochs = 0;
@@ -99,96 +96,106 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
     double learning_rate = 0.03;
     double momentum = 0.9;
     while(epochs < 200){
-    	//Placeholder - determine actual convergence condition here
-	    for(int k=0;k<no_batches;k++){
-	        /*
-	        THINGS TO POPULATE
-	        no_batches -> number of batches
-	        curr_batch_size -> current batch size
-	        batch_inputs,batch_outputs -> training data for current batch. It should be a vector<instance>
-	        */
-	        int curr_batch_size = batch_size;
-	        if(size<batch_size)
-	        {
-	            curr_batch_size = size;
-	        }
+        //Placeholder - determine actual convergence condition here
+        size = train_data.size();
+        cind = 0;
+        for(int k=0;k<no_batches;k++){
+            /*
+            THINGS TO POPULATE
+            no_batches -> number of batches
+            curr_batch_size -> current batch size
+            batch_inputs,batch_outputs -> training data for current batch. It should be a vector<instance>
+            */
+            int curr_batch_size = batch_size;
+            if(size < batch_size)
+            {
+                curr_batch_size = size;
+            }
 
-	        Matrix<double> batch_inputs(layers_desc[0],curr_batch_size);
-	        Matrix<double> batch_outputs(layers_desc[n_layers-1],curr_batch_size);
-	        
-	        for(int i=0;i<curr_batch_size;i++)
-	        {
-	            for(int j=0;j<layers_desc[0];j++)
-	            {
-	                batch_inputs[j][i] = train_data[i+cind].first[j];
-	            }
-	        }
-	        for(int i=0;i<curr_batch_size;i++)
-	        {
-	            for(int j=0;j<layers_desc[n_layers-1];j++)
-	            {
-	                if(train_data[i+cind].second==j)
-	                {
-	                    batch_outputs[j][i] = 1;
-	                }
-	                else
-	                {
-	                    batch_outputs[j][i] = 0;
-	                }
-	            }
-	        }
-	        size-=batch_size;
-	        cind+=curr_batch_size;
+            Matrix<double> batch_inputs(layers_desc[0],curr_batch_size);
+            Matrix<double> batch_outputs(layers_desc[n_layers-1],curr_batch_size);
+            
+            for(int i=0;i<curr_batch_size;i++)
+            {
+                for(int j=0;j<layers_desc[0];j++)
+                {
+                    batch_inputs[j][i] = train_data[i+cind].first[j];
+                }
+            }
+            for(int i=0;i<curr_batch_size;i++)
+            {
+                for(int j=0;j<layers_desc[n_layers-1];j++)
+                {
+                    if(train_data[i+cind].second==j)
+                    {
+                        batch_outputs[j][i] = 1;
+                    }
+                    else
+                    {
+                        batch_outputs[j][i] = 0;
+                    }
+                }
+            }
+            size-=batch_size;
+            cind+=curr_batch_size;
 
-			std::vector<Matrix<double>> values,errors;
-			for(int i=0;i<n_layers;i++){
-				values.push_back(Matrix<double>(layers_desc[i],curr_batch_size));
-				errors.push_back(Matrix<double>(layers_desc[i],curr_batch_size));
-				//values stores the value at a neuron WITHOUT activation
-			}
+            std::vector<Matrix<double>> values,errors, velocity, gradient_sum, derivatives;
+            for(int i=0;i<n_layers;i++){
+                values.push_back(Matrix<double>(layers_desc[i],curr_batch_size));
+                errors.push_back(Matrix<double>(layers_desc[i],curr_batch_size));
+                velocity.push_back(Matrix<double>(layers_desc[i],curr_batch_size));
+                gradient_sum.push_back(Matrix<double>(layers_desc[i],curr_batch_size));
+                //values stores the value at a neuron WITHOUT activation
+            }
 
-			//Feedforward
-			Matrix<double> temp(layers_desc[0],batch_size);
-			
-			for(int j=0;j<curr_batch_size;j++){
-				for(int l=0;l<layers_desc[0];l++){
-					values[0][l][j]=batch_inputs[l][j];
-					temp[l][j]=values[0][l][j];
-				}
-			}
-			
-			for(int i=1;i<n_layers-1;i++){
-				values[i]=weights[i-1]*temp ;//+ biases[i-1];
-				temp=sigmoid(values[i]);
-			}
+            //Feedforward
+            Matrix<double> temp(layers_desc[0],batch_size);
+            
+            for(int j=0;j<curr_batch_size;j++){
+                for(int l=0;l<layers_desc[0];l++){
+                    values[0][l][j]=batch_inputs[l][j];
+                    temp[l][j]=values[0][l][j];
+                }
+            }
 
-			values[n_layers-1] = weights[n_layers-2]*temp ;//+ biases[n_layers-2];
-			//Feedforward over
+            for(int i=1;i<n_layers-1;i++){
+                values[i]=weights[i-1]*temp; //+ biases[i-1];
+                temp=sigmoid(values[i]);
+            }
 
-			double batch_error = -(((batch_outputs.Transpose() * (log(sigmoid(values[n_layers - 1])))) + ((1 - batch_outputs).Transpose() * (log(sigmoid(1 - values[n_layers - 1]))))).diag_sum());
+            values[n_layers-1] = weights[n_layers-2]*temp; // + biases[n_layers-2];
+            //Feedforward over
 
-			errors[n_layers - 1] = sigmoid(values[n_layers - 1]) - batch_outputs;
+            double batch_error = -(((batch_outputs.Transpose() * (log(sigmoid(values[n_layers - 1])))) + ((1 - batch_outputs).Transpose() * (log(sigmoid(1 - values[n_layers - 1]))))).diag_sum());
 
-			for(int i=n_layers-2;i>=0;i--){
-				errors[i] = weights[i].Transpose() * errors[i + 1];
-				errors[i] = errors[i] / sigmoiddrv(values[i]);
-			}
-		
-			//for(int i=0;i<n_layers-1;i++)
-				//std::cout << (errors[i + 1] * sigmoid(values[i].Transpose())).shape() <<errors[i + 1].row_sum().shape() << std::endl;
+            errors[n_layers - 1] = sigmoid(values[n_layers - 1]) - batch_outputs;
 
-			//derivative of error w.r.t biases[i] = (1/curr_batch_size)*(errors[i+1].row_sum())
-			//derivative of error w.r.t weights[i]=(1 / curr_batch_size)*(errors[i + 1] * sigmoid(values[i].Transpose()))
-			//NOW YOU HAVE TO UPDATE THE WEIGHTS AND BIASES
-			for(int i=n_layers-2;i>=0;i--) {
-				velocity[i] = momentum * velocity[i] + (learning_rate * 1.000  * derivatives[i])/sqrt(gradient_sum[i] + epsilon);
-				weights[i] = weights[i] - velocity[i];
-				gradient_sum[i] += norm2(derivatives[i]);
-			}
-			//This is placeholder code for updating weights
-			//Will not compile yet.    
-		}
-	}
+            for(int i=n_layers-2;i>=0;i--){
+                errors[i] = weights[i].Transpose() * errors[i + 1];
+                errors[i] = errors[i] / sigmoiddrv(values[i]);
+            }
+        
+            //for(int i=0;i<n_layers-1;i++)
+                //std::cout << (errors[i + 1] * sigmoid(values[i].Transpose())).shape() <<errors[i + 1].row_sum().shape() << std::endl;
+
+            //derivative of error w.r.t biases[i] = (1/curr_batch_size)*(errors[i+1].row_sum())
+            //derivative of error w.r.t weights[i]=(1 / curr_batch_size)*(errors[i + 1] * sigmoid(values[i].Transpose()))
+            //NOW YOU HAVE TO UPDATE THE WEIGHTS AND BIASES
+            // for(int i=n_layers-2;i>=0;i--) {
+            //     derivatives[i] = (1/curr_batch_size)*errors[i + 1]*sigmoid(values[i].Transpose());
+            // }
+            // for(int i=n_layers-2;i>=0;i--) {
+            //     for(int j=0;j<weights[i].n_rows();j++) {
+            //         for(int k=0;k<weights[i].n_cols();k++) {
+            //             velocity[i][j][k] = momentum * velocity[i][j][k] + (learning_rate * 1.000  * derivatives[i])/sqrt(gradient_sum[i][j][k] + epsilon);
+            //             weights[i][j][k] = weights[i][j][k] - velocity[i][j][k];
+            //             gradient_sum[i] += derivatives[i].norm2();
+            //         }
+            //     }
+                std::cout <<"Batch Error: "<< batch_error << "In epoch: " << epochs << "\n";
+            }
+        epochs++;
+    }
 }
 
 int MultiLayerPerceptron::classify(attr &ist)
@@ -198,7 +205,7 @@ int MultiLayerPerceptron::classify(attr &ist)
         prev[i][0]=ist[i];
     }   
     for(int i=0;i<n_layers-1;i++){
-        auto t1 = weights[i] *prev ;//+ biases[i];
+        auto t1 = weights[i] * prev;// + biases[i];
         prev = sigmoid(t1);
         // std::cout<<t1<<prev<<"\n";
     }
