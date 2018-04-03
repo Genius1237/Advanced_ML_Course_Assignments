@@ -105,6 +105,7 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
     double momentum = 0.9;
     while(epochs < 200){
         //Placeholder - determine actual convergence condition here
+        double epoch_loss = 0.0;
         size = train_data.size();
         cind = 0;
         for(int k=0;k<no_batches;k++){
@@ -185,7 +186,7 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
             }
         
             //for(int i=0;i<n_layers-1;i++)
-                //std::cout << (errors[i + 1] * sigmoid(values[i].Transpose())).shape() <<errors[i + 1].row_sum().shape() << std::endl;
+                //std::cout << (errors[i + 1] * sigmoid(values[i]	.Transpose())).shape() <<errors[i + 1].row_sum().shape() << std::endl;
 
             //derivative of error w.r.t biases[i] = (1/curr_batch_size)*(errors[i+1].row_sum())
             //derivative of error w.r.t weights[i]=(1 / curr_batch_size)*(errors[i + 1] * sigmoid(values[i].Transpose()))
@@ -201,8 +202,14 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
             //             gradient_sum[i] += derivatives[i].norm2();
             //         }
             //     }
-                std::cout <<"Batch Error: "<< batch_error << "In epoch: " << epochs << "\n";
+	            for(int i = 0; i < n_layers-1; i++)
+	            {
+	            	weights[i] = weights[i] - ((learning_rate * 1.00 / curr_batch_size)*(errors[i + 1] * sigmoid(values[i].Transpose())));
+	            	biases[i] = biases[i] - (learning_rate * 1.00 /curr_batch_size)*(errors[i+1].row_sum());
+	            }
+	            epoch_loss += batch_error;
             }
+        std::cout << "Epoch loss: " << epoch_loss << " for epoch: "<< epochs << '\n';
         epochs++;
     }
 }
