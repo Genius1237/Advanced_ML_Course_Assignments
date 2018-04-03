@@ -1,6 +1,4 @@
 #include "multi_layer_perceptron.h"
-//#include "utilities.h"
-#include <functional>
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
@@ -101,9 +99,9 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
     int cind = 0;
     int epochs = 0;
     double epsilon = 1e-8;
-    double learning_rate = 0.03;
+    double learning_rate = 0.001;
     double momentum = 0.9;
-    while(epochs < 200){
+    while(epochs < 100){
         //Placeholder - determine actual convergence condition here
         double epoch_loss = 0.0;
         size = train_data.size();
@@ -168,14 +166,17 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
             }
 
             for(int i=1;i<n_layers-1;i++){
-                values[i] = (weights[i - 1] * temp) +biases[i-1];
+                values[i] = ((weights[i - 1] * temp) + biases[i-1]);
+				//std::cout<<(weights[i - 1] * temp)+biases[i-1]<<"\n";
+				//std::cout<<values[i]<<"\n";
+				//getchar();
                 temp = sigmoid(values[i]);
             }
 
 
             values[n_layers-1] = (weights[n_layers-2] * temp) + biases[n_layers-2];
             //Feedforward over
-
+			
             double batch_error = -(((batch_outputs.Transpose() * (log(sigmoid(values[n_layers - 1])))) + ((1 - batch_outputs).Transpose() * (log(sigmoid(1 - values[n_layers - 1]))))).diag_sum());
 
             errors[n_layers - 1] = sigmoid(values[n_layers - 1]) - batch_outputs;
@@ -191,7 +192,8 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
             //derivative of error w.r.t biases[i] = (1/curr_batch_size)*(errors[i+1].row_sum())
             //derivative of error w.r.t weights[i]=(1 / curr_batch_size)*(errors[i + 1] * sigmoid(values[i].Transpose()))
             //NOW YOU HAVE TO UPDATE THE WEIGHTS AND BIASES
-            // for(int i=n_layers-2;i>=0;i--) {
+            
+			// for(int i=n_layers-2;i>=0;i--) {
             //     derivatives[i] = (1/curr_batch_size)*errors[i + 1]*sigmoid(values[i].Transpose());
             // }
             // for(int i=n_layers-2;i>=0;i--) {
@@ -221,7 +223,7 @@ int MultiLayerPerceptron::classify(attr &ist)
         prev[i][0]=ist[i];
     }   
     for(int i=0;i<n_layers-1;i++){
-        auto t1 = weights[i] * prev + biases[i];
+        auto t1 =( weights[i] * prev) + biases[i];
         prev = sigmoid(t1);
         // std::cout<<t1<<prev<<"\n";
     }

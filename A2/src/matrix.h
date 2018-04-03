@@ -22,7 +22,7 @@ public:
     Matrix<T> Transpose();
     Matrix<T> inverse();
     T norm2();
-    Matrix<T> operator = (const Matrix<T>& a);
+    //Matrix<T> operator = (const Matrix<T>& a);
     std::vector<T>& operator[](int index);
     void cofactor(Matrix<T>,Matrix<T>&,int a ,int b ,int c);
     int n_rows();
@@ -82,7 +82,7 @@ Matrix<T>::Matrix(const Matrix<T>& a) {
     for(int i = 0; i < a.numrows; i++) {
         this->v[i].resize(a.numcols);
         for(int j = 0; j < a.numcols; j++) {
-            this -> v[i].push_back(a.v[i][j]);
+            this -> v[i][j]=a.v[i][j];
         }
     }
 }
@@ -224,6 +224,7 @@ Matrix<T> operator-(const Matrix<T> &b, double a)
     return c;
 }
 
+/*
 template<typename T>
 Matrix<T> Matrix<T>::operator= (const Matrix<T>& b) {
     //Self assignment should not happen
@@ -235,7 +236,7 @@ Matrix<T> Matrix<T>::operator= (const Matrix<T>& b) {
             this -> v[i].clear();
         }
         this -> v.clear();
-        
+
         v.resize(b.numrows);
         assert(v.size()==b.numrows);
         for(int i = 0; i < b.numrows; i++) {
@@ -245,8 +246,12 @@ Matrix<T> Matrix<T>::operator= (const Matrix<T>& b) {
             }
         }
     }
+    std::cout<<b<<"\n";
+    std::cout<<*this<<"\n";
+    getchar();
     return *this;
 }
+*/
 
 template<typename T>
 Matrix<T> operator* (const Matrix<T>& a, const Matrix<T>& b) {
