@@ -15,7 +15,7 @@ class ClassificationModel{
 		ClassificationModel(int);
 		virtual void train(std::vector<instance> &) = 0;
 		virtual int classify(attr &) = 0;
-		void test(std::vector<instance>);
+		void test(std::vector<instance>&);
 };
 
 class MultiLayerPerceptron:public ClassificationModel{
@@ -26,8 +26,11 @@ class MultiLayerPerceptron:public ClassificationModel{
   	public:
 		MultiLayerPerceptron(int, std::vector<int>&);
 		void train(std::vector<instance> &);
-		void train(std::vector<instance> &, int);
+        void train(std::vector<instance>&, std::vector<instance>&, int);
 		int classify(attr &);
-		void test(std::vector<instance>);
+		void test(std::vector<instance>&);
+		double validation_error(std::vector<instance>&,int);
+		std::pair<Matrix<double>,Matrix<double>> prepare_data(std::vector<instance>::iterator,std::vector<instance>::iterator);
+		void random_init();
 };
 #endif
