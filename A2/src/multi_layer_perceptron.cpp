@@ -84,8 +84,8 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
     //DO RANDOM INITIALIZATION OF WEIGHTS IN RANGE (0,1)
     std::random_device ram;
     std::default_random_engine gen{ram()};
-    std::uniform_real_distribution<double> dist(0.000,1.000);
-    for(int i=0;i<n_layers-1;i++)
+    std::uniform_real_distribution<double> dist(-1.000,1.000);
+	for(int i=0;i<n_layers-1;i++)
     {
         for(int j=0;j<weights[i].n_rows();j++)
         {
@@ -110,9 +110,9 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
     int cind = 0;
     int epochs = 0;
     double epsilon = 1e-8;
-    double learning_rate = 0.0003;
+    double learning_rate = 0.3;
     double momentum = 0.9;
-    while(epochs < 100){
+    while(epochs < 300){
         //Placeholder - determine actual convergence condition here
         double epoch_loss = 0.0;
         size = train_data.size();
@@ -178,9 +178,6 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
 
             for(int i=1;i<n_layers-1;i++){
                 values[i] = ((weights[i - 1] * temp) + biases[i-1]);
-				//std::cout<<(weights[i - 1] * temp)+biases[i-1]<<"\n";
-				//std::cout<<values[i]<<"\n";
-				//getchar();
                 temp = sigmoid(values[i]);
             }
 
@@ -188,7 +185,7 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
             values[n_layers-1] = (weights[n_layers-2] * temp) + biases[n_layers-2];
             //Feedforward over
 			
-            double batch_error = -(((batch_outputs.Transpose() * (log(sigmoid(values[n_layers - 1])))) + ((1 - batch_outputs).Transpose() * (log(sigmoid(1 - values[n_layers - 1]))))).diag_sum());
+            double batch_error = sqrt(-(((batch_outputs.Transpose() * (log(sigmoid(values[n_layers - 1])))) + ((1 - batch_outputs).Transpose() * (log(sigmoid(1 - values[n_layers - 1]))))).diag_sum()));
 
             errors[n_layers - 1] = sigmoid(values[n_layers - 1]) - batch_outputs;
 
@@ -215,13 +212,52 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, int batch_si
             //             gradient_sum[i] += derivatives[i].norm2();
             //         }
             //     }
-	            for(int i = 0; i < n_layers-1; i++)
-	            {
-	            	weights[i] = weights[i] - ((learning_rate * 1.00 / curr_batch_size)*(errors[i + 1] * sigmoid(values[i].Transpose())));
-	            	biases[i] = biases[i] - (learning_rate * 1.00 /curr_batch_size)*(errors[i+1].row_sum());
-	            }
-	            epoch_loss += batch_error;
-            }
+			/*
+			Code for manually calculating derivatives
+			if(epochs==0){
+				auto drv=weights[0];
+				auto epsilon=0.0001;
+				for(int i=0;i<drv.n_rows();i++){
+					for(int j=0;j<drv.n_cols();j++){
+
+						weights[0][i][j]+=epsilon;
+						Matrix<double> temp=batch_inputs;
+
+						for(int k=0;k<n_layers-1;k++){
+							temp = sigmoid(((weights[k] * temp) + biases[k]));
+						}
+
+						double e1 = sqrt(-(((batch_outputs.Transpose() * (log(temp))) + ((1 - batch_outputs).Transpose() * (log(1-temp)))).diag_sum()));
+						//std::cout<<e1<<" "<<batch_error<<"\n";
+						//getchar();
+
+						weights[0][i][j]-=2*epsilon;
+						temp=batch_inputs;
+
+						for(int k=0;k<n_layers-1;k++){
+							temp = sigmoid(((weights[k] * temp) + biases[k]));
+						}
+
+						double e2 = sqrt(-(((batch_outputs.Transpose() * (log(temp))) + ((1 - batch_outputs).Transpose() * (log(1-temp)))).diag_sum()));
+
+
+						drv[i][j]=((1/(2*epsilon))*(e1-e2));
+						weights[0][i][j]+=epsilon;
+					}
+				}
+				std::cout<<drv;
+				std::cout<<(errors[1] * (values[0].Transpose()));
+				exit(0);
+			}
+			*/
+			weights[0] = weights[0] - ((learning_rate * 1.00 / curr_batch_size)*(errors[1] * (values[0].Transpose())));
+	        biases[0] = biases[0] - (learning_rate * 1.00 /curr_batch_size)*(errors[1].row_sum());
+	        for(int i = 1; i < n_layers-1; i++){
+				weights[i] = weights[i] - ((learning_rate * 1.00 / curr_batch_size)*(errors[i + 1] * sigmoid(values[i].Transpose())));
+	            biases[i] = biases[i] - (learning_rate * 1.00 /curr_batch_size)*(errors[i+1].row_sum());
+	        }	
+	        epoch_loss += batch_error;
+        }
         std::cout << "Epoch loss: " << epoch_loss << " for epoch: "<< epochs << '\n';
         epochs++;
     }
@@ -237,7 +273,6 @@ int MultiLayerPerceptron::classify(attr &ist)
     for(int i=0;i<n_layers-1;i++){
         auto t1 =( weights[i] * prev) + biases[i];
         prev = sigmoid(t1);
-        // std::cout<<t1<<prev<<"\n";
     }
 
     int max=0;
