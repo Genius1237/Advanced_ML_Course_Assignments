@@ -1,4 +1,4 @@
-CC=g++ --std=c++14 -g -O3
+CC=g++ --std=c++14 -g -O2
 main: multi_layer_perceptron.o matrix.o main.cpp
 	$(CC) multi_layer_perceptron.o matrix.o main.cpp
 	
