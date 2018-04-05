@@ -190,7 +190,7 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, std::vector<
 		}
 	}
 	
-	while(epochs < 1000){
+	while(epochs < 200){
 		double epoch_loss = 0.0;
 		size = train_data.size();
 		cind = 0;		
@@ -291,16 +291,16 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, std::vector<
 				exit(0);
 			}
 			*/
-			/*weights[0] = weights[0] - ((learning_rate * 1.00 / curr_batch_size)*(errors[1] * (values[0].Transpose())));
+			weights[0] = weights[0] - ((learning_rate * 1.00 / curr_batch_size)*(errors[1] * (values[0].Transpose())));
 			biases[0] = biases[0] - (learning_rate * 1.00 /curr_batch_size)*(errors[1].row_sum());
 			for(int i = 1; i < n_layers-1; i++){
 				weights[i] = weights[i] - ((learning_rate * 1.00 / curr_batch_size)*(errors[i + 1] * sigmoid(values[i].Transpose())));
 				biases[i] = biases[i] - (learning_rate * 1.00 /curr_batch_size)*(errors[i+1].row_sum());
-			}	*/
+			}	
 
 			// Adaptive Gradient Descent with momentum
 			//std::cout << "sadlksaldkjs" << epochs << std::endl;
-			for(int i =0; i<n_layers-1;i++)
+			/*for(int i =0; i<n_layers-1;i++)
 			{
 				// finding the gradient of error function with respect to nodes in one layer
 				if(i==0)
@@ -325,7 +325,7 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, std::vector<
 
 				weights[i] = weights[i] - prev_weights[i];
 				biases[i] = biases[i] - prev_biases[i];
-			}
+			}*/
 			epoch_loss += batch_error;
 		}
 		double valid_error=validation_error(validation_data);
@@ -342,7 +342,7 @@ int MultiLayerPerceptron::classify(attr &ist)
 		prev[i][0]=ist[i];
 	}   
 	for(int i=0;i<n_layers-1;i++){
-		prev=sigmoid( weights[i] * prev) + biases[i];
+		prev=sigmoid( weights[i] * prev + biases[i]);
 	}
 
 	int max=0;
