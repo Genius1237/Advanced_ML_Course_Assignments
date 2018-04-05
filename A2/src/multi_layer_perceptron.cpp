@@ -120,6 +120,7 @@ double MultiLayerPerceptron::validation_error(std::vector<instance> &data,int ba
         double e = -(((batch_outputs.Transpose() * (log(temp))) + ((1 - batch_outputs).Transpose() * (log(1 - temp)))).diag_sum());
 		error+=e;
     }
+    return error;
 }
 
 void MultiLayerPerceptron::random_init(){
@@ -159,11 +160,40 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, std::vector<
 	int size = train_data.size();
 	double prev_batch_error = std::numeric_limits<double>::max();
 	int cind = 0;
+	std::vector< Matrix<double> > prev_weights, prev_biases;
+	std::vector< Matrix<double> > accum_weights, accum_biases;
+	std::vector< Matrix<double> > delta_weights, delta_biases;
+	for(int i=0;i<n_layers-1;i++)
+	{
+		prev_weights.push_back(Matrix<double>( layers_desc[i+1] , layers_desc[i]));
+		prev_biases.push_back(Matrix<double>( layers_desc[i+1] , 1));
+		accum_weights.push_back(Matrix<double>( layers_desc[i+1] , layers_desc[i]));
+		accum_biases.push_back(Matrix<double>( layers_desc[i+1] , 1));
+		delta_weights.push_back(Matrix<double>( layers_desc[i+1] , layers_desc[i]));
+		delta_biases.push_back(Matrix<double>( layers_desc[i+1] , 1));
+	}
+	for(int i=0;i<n_layers-1;i++)
+	{
+		for(int j=0;j<accum_weights[i].n_rows();j++)
+		{
+			for(int k=0;k<accum_weights[i].n_cols();k++)
+			{
+				accum_weights[i][j][k] = epsilon;
+			}
+		}
+		for(int j=0;j<accum_biases[i].n_rows();j++)
+		{
+			for(int k=0;k<accum_biases[i].n_cols();k++)
+			{
+				accum_biases[i][j][k] = epsilon;
+			}
+		}
+	}
 	
-	while(epochs < 10){
+	while(epochs < 1000){
 		double epoch_loss = 0.0;
 		size = train_data.size();
-		cind = 0;
+		cind = 0;		
 		for(int k=0;k<no_batches;k++){
 			int curr_batch_size = batch_size;
 			if(size < batch_size)
@@ -261,12 +291,41 @@ void MultiLayerPerceptron::train(std::vector<instance> &train_data, std::vector<
 				exit(0);
 			}
 			*/
-			weights[0] = weights[0] - ((learning_rate * 1.00 / curr_batch_size)*(errors[1] * (values[0].Transpose())));
+			/*weights[0] = weights[0] - ((learning_rate * 1.00 / curr_batch_size)*(errors[1] * (values[0].Transpose())));
 			biases[0] = biases[0] - (learning_rate * 1.00 /curr_batch_size)*(errors[1].row_sum());
 			for(int i = 1; i < n_layers-1; i++){
 				weights[i] = weights[i] - ((learning_rate * 1.00 / curr_batch_size)*(errors[i + 1] * sigmoid(values[i].Transpose())));
 				biases[i] = biases[i] - (learning_rate * 1.00 /curr_batch_size)*(errors[i+1].row_sum());
-			}	
+			}	*/
+
+			// Adaptive Gradient Descent with momentum
+			//std::cout << "sadlksaldkjs" << epochs << std::endl;
+			for(int i =0; i<n_layers-1;i++)
+			{
+				// finding the gradient of error function with respect to nodes in one layer
+				if(i==0)
+				{
+					delta_weights[0] = errors[1] * (values[0].Transpose());
+					delta_biases[0] = errors[1].row_sum();
+				}
+				else
+				{
+					delta_weights[i] = errors[i+1] * sigmoid(values[i].Transpose());
+					delta_biases[i] = errors[i+1].row_sum();
+				}
+
+				//std::cout << "sadlksaldkjs" << epochs << std::endl;
+				// gradient for ith layer found out.
+				// looks like division but, is in deep reality, element wise multiplication.
+				accum_weights[i] = accum_weights[i] + delta_weights[i] / delta_weights[i];
+				accum_biases[i] = accum_biases[i] + delta_biases[i] / delta_biases[i];
+
+				prev_weights[i] = momentum*prev_weights[i] + (learning_rate*10.000 / curr_batch_size) * (delta_weights[i]^sqrt(accum_weights[i]));
+				prev_biases[i] = momentum*prev_biases[i] + (learning_rate*10.000 / curr_batch_size) * (delta_biases[i]^sqrt(accum_biases[i]));
+
+				weights[i] = weights[i] - prev_weights[i];
+				biases[i] = biases[i] - prev_biases[i];
+			}
 			epoch_loss += batch_error;
 		}
 		double valid_error=validation_error(validation_data);

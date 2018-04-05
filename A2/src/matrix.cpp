@@ -13,6 +13,19 @@ Matrix<double> exp(const Matrix<double> &d)
     return m;
 }
 
+Matrix<double> sqrt(const Matrix<double> &d)
+{
+    Matrix<double> m = d;
+    for (int i = 0; i < m.n_rows(); i++)
+    {
+        for (int j = 0; j < m.n_cols(); j++)
+        {
+            m[i][j] = sqrt(m[i][j]);
+        }
+    }
+    return m;
+}
+
 Matrix<double> log(const Matrix<double> &d)
 {
     Matrix<double> m = d;

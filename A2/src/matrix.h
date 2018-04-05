@@ -50,6 +50,8 @@ public:
     friend Matrix<TT> operator*(const Matrix<TT> &a, const Matrix<TT> &b);
     template <class TT>
     friend Matrix<TT> operator/(const Matrix<TT>& a, const Matrix<TT>& b);
+    template <class TT>
+    friend Matrix<TT> operator^(const Matrix<TT>& a, const Matrix<TT>& b);
     template<class TT>
     friend Matrix<TT> operator* (const double a, const Matrix<TT>&b);
     template<class TT>
@@ -289,6 +291,22 @@ Matrix<T> operator/ (const Matrix<T>& a, const Matrix<T>& b) {
 }
 
 template<typename T>
+Matrix<T> operator^ (const Matrix<T>& a, const Matrix<T>& b) {
+
+    if((a.numcols != b.numcols)||(a.numrows != b.numrows)){
+        std::cerr << a.shape() << '*' << b.shape() << std::endl;
+        throw "Matrix Dimension Mismatch at op ^ ";
+    }
+    Matrix<T> c(a.numrows,a.numcols);
+    for(int i = 0;i < a.numrows;i++) {
+        for(int j = 0;j < a.numcols; j++) {
+            c.v[i][j]=a.v[i][j]/b.v[i][j];
+        }
+    }
+    return c;
+}
+
+template<typename T>
 Matrix<T> operator* (const double a, const Matrix<T>& b) {
     Matrix<T> c(b.numrows, b.numcols);
     for(int i = 0; i < b.numrows; i++) {
@@ -483,4 +501,5 @@ Matrix<double> sigmoid(const Matrix<double>&);
 Matrix<double> sigmoiddrv(const Matrix<double> &);
 Matrix<double> exp(const Matrix<double> &);
 Matrix<double> log(const Matrix<double> &);
+Matrix<double> sqrt(const Matrix<double> &);
 #endif
