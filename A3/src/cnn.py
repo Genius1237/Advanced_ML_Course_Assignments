@@ -2,16 +2,15 @@
 import numpy as np
 import keras
 from keras.datasets import mnist
-from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Dense, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras.optimizers import Adam
-from keras import backend as K
+import matplotlib.pyplot as plt
 
 batch_size = 128
 num_classes = 10
-epochs = 50
+epochs = 1
 
 
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
@@ -44,8 +43,27 @@ model.add(Dense(num_classes, activation='softmax'))
 
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 print(model.summary())
-#exit()
 history = model.fit(x=X_train, y=y_train, batch_size=batch_size,validation_split=0.2, epochs=epochs)
+print(history.history.keys())
+plt.figure()
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('Model Accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Number of Epochs')
+plt.legend(['Train Accuracy', 'Test Accuracy'], loc='upper left')
+plt.savefig('Accuracy.png')
+plt.close()
+
+plt.figure()
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model Loss')
+plt.ylabel('Loss')
+plt.xlabel('Number of Epochs')
+plt.legend(['Train Loss', 'Test Loss'], loc='upper left')
+plt.savefig('Losses.png')
+plt.close()
 
 score = model.evaluate(x=X_test, y=y_test)
 print('Test Loss: ', score[0])
