@@ -1,4 +1,4 @@
-import pandas as pd
+#import pandas as pd
 import numpy as np
 import keras
 from keras.datasets import mnist
@@ -11,7 +11,7 @@ from keras import backend as K
 
 batch_size = 128
 num_classes = 10
-epochs = 2
+epochs = 50
 
 
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
@@ -30,18 +30,22 @@ y_test = keras.utils.to_categorical(y_test, num_classes=num_classes)
 model = Sequential()
 model.add(Conv2D(64, kernel_size=(5,5), padding='valid', activation='sigmoid', input_shape=input_shape))
 model.add(MaxPooling2D(pool_size=(2,2)))
+
 model.add(Conv2D(64, kernel_size=(5,5), padding='valid', activation='sigmoid'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 #Reduces to a 4x4 dimension matrix after this
 
-# model.add(Conv2D(64, kernel_size=(3,3), padding='valid', activation='sigmoid'))
-# model.add(MaxPooling2D(pool_size=(2,2)))
-model.add(Dense(128, activation='sigmoid'))
+model.add(Conv2D(64, kernel_size=(3,3), padding='valid', activation='sigmoid'))
+model.add(MaxPooling2D(pool_size=(2,2)))
+
+#model.add(Dense(128, activation='sigmoid'))
 model.add(Flatten())
 model.add(Dense(num_classes, activation='softmax'))
 
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-model.fit(x=X_train, y=y_train, batch_size=batch_size,validation_split=0.2, epochs=epochs)
+print(model.summary())
+#exit()
+history = model.fit(x=X_train, y=y_train, batch_size=batch_size,validation_split=0.2, epochs=epochs)
 
 score = model.evaluate(x=X_test, y=y_test)
 print('Test Loss: ', score[0])
