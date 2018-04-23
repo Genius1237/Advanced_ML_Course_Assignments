@@ -1,0 +1,196 @@
+\documentclass{article}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{float}
+\usepackage{subfigure}
+\begin{document}
+    \title{Selected Topics From CS: Assignment 3}
+    \author{Anirudh Srinivasan (2015A7PS0382H) \\ Bharat Raghunathan (2015AAPS0263H) \\ Nitish Ravishankar (2015A7PS0152H) }
+    \maketitle
+
+\tableofcontents
+
+\large
+\section{Task 1: ANN (Artificial Neural Network)}
+The aim of this task was to develop an Artificial Neural Network
+to classify handwritten digits given the images in $28\times28$ matrix of pixels.
+The formula used in a $3$-layer Artificial Neural Network are as follows:
+For the first layer
+\begin{equation}
+a_j = \sum_{i=1}^D w_{ji}^{(1)}x_i + w_{j0}^{(1)}
+\end{equation}
+and each of these $a_j$ is then transformed by a differentiable non-linear \emph{activation} function
+\begin{equation}
+    \large
+    z_j = h(a_j)
+\end{equation}
+Following (2), these values are again linearly combined to give the equation for the second layer
+\begin{equation}
+    \large
+    a_k = \sum_{j=1}^M w_{kj}^{(2)}z_j + w_{k0}^{(2)}
+\end{equation}
+where $w_{k0}^{(2)}$ and $w_{j0}^{(1)}$ are the bias parameters
+Finally, the outputs are given by
+\begin{equation}
+    \large
+    y_k = \sigma(a_k) 
+\end{equation}
+where
+\begin{equation}
+    \sigma(a) = \frac{1}{1 + exp(-a)}
+\end{equation}
+is the sigmoid function.
+\subsection{Main subtasks presented by the problem}
+\begin{enumerate}
+ \item \textbf{Preprocessing:-} The pixels either have to be binarized (i.e. \{0, 1\} values) or they have to
+ be between the range [0, 1] since the Neural Network weights are randomly initialized in the range [0, 1]
+ \item \textbf{Hyperparameters:-} We had chosen the \textit{Adam} optimizer.
+ However, since an accuracy of well over $95\%$ was obtained with just $30$ epochs, the number of epochs was limited to $30$.
+\end{enumerate}
+\section{Task 2: CNN (Convolutional Neural Network)}
+The aim of this task was to develop a Convolutional Neural Network
+to classify handwritten digits given the images in $28\times28$ matrices of pixels.
+The equations followed are pretty much the same as above, with the only differences being:-
+    \begin{enumerate}[label=\roman*)]
+        \item \textbf{Local Receptive Fields:} The feature invariances are captured locally in subregions of the image, rather than globally in the whole image.
+        \item \textbf{Weight Sharing:} All the weights mapping from one set of ${n}\times{n}$ pixels to one region in the feature map, share the SAME weights.The value of $n$ is specified in the \emph{kernel\_size} parameter 
+        \item \textbf{Subsampling:} The pixels are subsampled typically using a \emph{pooling} layer which simply takes the maximum/minimum/average of every ${k}\times{k}$ window of pixels. The pixel window $k$ is specified as a parameter.
+    \end{enumerate}
+
+\subsection{Main subtasks presented by the problem}
+\begin{enumerate}
+	\item \textbf{Preprocessing:-} The pixels either have to be binarized (i.e. \{0, 1\} values) or they have to
+	      be between the range [0, 1] since the Neural Network weights are randomly initialized in the range [0, 1]
+	\item \textbf{Hyperparameters:-} We had chosen the \textit{Adam} optimizer, a $2\times2$ window for MaxPooling and a $5\times5$ kernel for Convolutional Layer.
+	      However, since an accuracy of well over $95\%$ was obtained with just $50$ epochs, the number of epochs was limited to $50$.
+\end{enumerate}
+
+\begin{section}{Results}
+
+The results for ANNs and CNNs and the model summary are displayed for $1$, $2$ and $3$ layers, respectively
+
+    \begin{figure}[H]
+        \subfigure[1 Layer ANN]
+        {
+            \includegraphics[width=6.5in]{ANN_30_1.png}
+        }
+        \\
+        \subfigure[2 Layers ANN]
+        {
+            \includegraphics[width=6.5in]{ANN_30_2.png}
+        }
+        \\
+        \subfigure[3 Layers ANN]
+        {
+            \includegraphics[width=6.5in]{ANN_30_3.png}
+        }
+        \caption{Accuracy with Number of Layers}
+    \end{figure}
+
+    \begin{figure}[H]
+        \subfigure[1 Layer CNN]
+        {
+            \includegraphics[width=6.5in]{CNN_50_1.png}
+        }
+        \\
+        \subfigure[2 Layers CNN]
+        {
+            \includegraphics[width=6.5in]{CNN_50_2.png}
+        }
+        \\
+        \subfigure[3 Layers CNN]
+        {
+            \includegraphics[width=6.5in]{CNN_50_3.png}
+        }
+        \caption{Accuracy with Number of Layers}
+    \end{figure}
+
+\end{section}
+\subsection{Understanding of Results}
+
+\begin{enumerate}
+		
+	\item Accuracy of the Artificial Neural Network is above 95\%, so most of the invariance has already been captured.
+    \item More number of hidden layers take a lesser no of epochs to converge and also give higher Accuracy,
+    but after a point, they may start \emph{overfitting}
+\end{enumerate}
+
+\begin{table}[H]
+	\begin{tabular}{|c|c|} \hline
+		Number of Layers of ANN & Accuracy \\ \hline
+		1                               & 95.12\%  \\ \hline
+		2                               & 96.69\%  \\ \hline
+		3                               & 96.49\%  \\ \hline
+	\end{tabular}
+	\caption{Accuracy for different number of ANN Layers}
+\end{table}
+
+\begin{table}[H]
+	\begin{tabular}{|c|c|} \hline
+		Number of Layers of CNN & Accuracy \\ \hline
+		1                       & 98.61\%  \\ \hline
+		2                       & 99.08\%  \\ \hline
+		3                       & 99.09\%  \\ \hline
+	\end{tabular}
+	\caption{Accuracy for different number of CNN Layers}
+\end{table}
+
+\bigskip
+\bigskip
+\bigskip
+The training and test losses for ANN and CNN for $1$, $2$ and $3$ Layers respectively are also plotted
+
+\begin{figure}[H]
+	\centering
+	\large
+	\subfigure[1 Layer ANN]
+	{
+		\includegraphics[width=3.5in]{Losses_ANN_30_1.png}
+	}
+	\\
+	\subfigure[2 Layers ANN]
+	{
+		\includegraphics[width=3.5in]{Losses_ANN_30_2.png}
+	}
+	\\
+	\subfigure[3 Layers ANN]
+	{
+		\includegraphics[width=3.5in]{Losses_ANN_30_3.png}
+	}
+	\caption{Train and Test Losses with Number of ANN Layers}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\large
+	\subfigure[1 Layers CNN]
+	{
+		\includegraphics[width=3.5in]{Losses_CNN_50_1.png}
+	}
+	\\
+	\subfigure[2 Layers CNN]
+	{
+		\includegraphics[width=3.5in]{Losses_CNN_50_2.png}
+	}
+	\\
+	\subfigure[3 Layers CNN]
+	{
+		\includegraphics[width=3.5in]{Losses_CNN_50_3.png}
+	}
+	\caption{Train and Test Losses with Number of CNN Layers}
+\end{figure}
+
+\appendix
+\section{Notation used for Equations}
+\begin{align*}
+w_{jk}^{(l)} = \textrm{Weight from $k^{th}$ neuron in $(l-1)^{th}$ layer to $j^{th}$ neuron in $l^{th}$ layer } \\
+a_j	= \textrm{Value of $j^{th}$ neuron before activation}	\\
+z_j	= \textrm{Value of $j^{th}$ neuron after activation} 	\\
+exp(a) = \textrm{Exponential Function}
+\end{align*}
+
+\end{document}
