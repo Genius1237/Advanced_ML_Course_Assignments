@@ -1,4 +1,3 @@
-import pandas as pd
 import numpy as np
 import keras
 from keras.preprocessing.image import ImageDataGenerator
@@ -7,6 +6,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Flatten
 from keras.optimizers import Adam
 from keras import backend as K
+import matplotlib.pyplot as plt
 
 batch_size = 128
 num_classes = 10
@@ -25,11 +25,32 @@ y_train = keras.utils.to_categorical(y_train, num_classes=num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes=num_classes)
 
 model = Sequential()
-model.add(Dense(100, input_dim=X_train.shape[1], activation='sigmoid'))
+model.add(Dense(20, input_dim=X_train.shape[1], activation='sigmoid'))
 model.add(Dense(num_classes, activation='softmax'))
 
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-model.fit(x=X_train, y=y_train, batch_size=batch_size, validation_split=0.2, epochs=epochs, verbose=1)
+history = model.fit(x=X_train, y=y_train, batch_size=batch_size, validation_split=0.2, epochs=epochs, verbose=1)
+
+plt.figure()
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('Model Accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Number of Epochs')
+plt.legend(['Train Accuracy', 'Test Accuracy'], loc='upper left')
+plt.savefig('Accuracy.png')
+plt.close()
+
+plt.figure()
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model Loss')
+plt.ylabel('Loss')
+plt.xlabel('Number of Epochs')
+plt.legend(['Train Loss', 'Test Loss'], loc='upper left')
+plt.savefig('Losses.png')
+plt.close()
+
 
 score = model.evaluate(x=X_test, y=y_test, verbose=1)
 #Actually display the test loss and accuracy

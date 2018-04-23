@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 batch_size = 128
 num_classes = 10
-epochs = 1
+epochs = 50
 
 
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
@@ -44,7 +44,7 @@ model.add(Dense(num_classes, activation='softmax'))
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 print(model.summary())
 history = model.fit(x=X_train, y=y_train, batch_size=batch_size,validation_split=0.2, epochs=epochs)
-print(history.history.keys())
+
 plt.figure()
 plt.plot(history.history['acc'])
 plt.plot(history.history['val_acc'])
