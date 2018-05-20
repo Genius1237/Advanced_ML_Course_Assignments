@@ -1,5 +1,6 @@
 # ML2-assignments
 Solutions to Advanced Machine Learning Assignments 2018-19 from BITS Pilani Hyderabad Campus in C++ with STL
+Code for each assignment is within the src folder within the folder for each assignment
 ## Matrix Class
 Include the matrix.h file in the code which needs to make use of matrix operations by
 ```cpp
