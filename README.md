@@ -1,39 +1,23 @@
 # ML2-assignments
-Solutions to Advanced Machine Learning Assignments 2018-19 from BITS Pilani Hyderabad Campus
-# Assignment 1
+Solutions to Advanced Machine Learning Assignments 2018-19 from BITS Pilani Hyderabad Campus in C++ with STL
 ## Matrix Class
 Include the matrix.h file in the code which needs to make use of matrix operations by
 ```cpp
 #include "matrix.h"
 ```
-To run any code which uses matrix functionalities, compile them along with the `matrix.cpp` file
-```sh
-g++ -std=c++14 matrix.cpp <other files>.cpp
-```
+This header file is an implementation of a matrix class with a large number of operations needed for these assignments
+The class aims to support the kind of matrix operations similar to the ones supported by numpy.
+# Assignment 1
+Implementation of 3 different linear classification models from chapter 4 of Pattern Recognition and Machine Learning by Christopher Bishop
+1. Fischer's Linear Discriminant Method
+2. Probabilistic Generative Model
+3. Logistic Regression
 
-## Example usage of Matrix Class
-```cpp
-// The header file matrix.h must be included
-#include "matrix.h"
-#include <bits/stdc++.h>
-using namespace std;
-int main()
-{
-	//Instantiation of a Matrix object
-	Matrix a(1,2), b(1,2), c(2,1), d(2,2), e(1,2);
+# Assignment 2
+Implementation of feedforward neural networks along with backpropagation. Developed in a modular fashion where in the number of layers and number of neurons in each layer can be specified
 
-	//Access and modify data members with usual [] notation
-	a[0][0]=14; a[0][1]=23;
-	b[0][0]=9; b[0][1]=12;
 
-	//Operations like matrix addition, multiplication and transpose
-	c = Transpose(a - b);
-	d = Transpose(a - b) * a;
-	e = a + b;
-
-	//Output the matrix in 2D form
-	cout << c << d;
-	cout << e;
-	return 0;
-}
-```
+# Assignment 3
+Implementation of 2 models in keras for digit recognition
+1. Simple NN Model
+2. CNN Model
